@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "auth_user_role", uniqueConstraints = @UniqueConstraint(columnNames = {"account_code", "role_code"}))
+@Table(name = "auth_user_role", uniqueConstraints = @UniqueConstraint(columnNames = {"emp_no", "role_code"}))
 public class AuthUserRole {
 
     @Id
@@ -20,8 +20,8 @@ public class AuthUserRole {
 
     @NotNull
     @Size(max = 20)
-    @Column(unique = true, length = 20, nullable = false)
-    private String accountCode;
+    @Column(length = 20, nullable = false)
+    private String empNo;
 
     @NotNull
     @Size(max = 20)

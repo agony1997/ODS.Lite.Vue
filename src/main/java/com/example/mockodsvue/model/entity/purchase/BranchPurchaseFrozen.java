@@ -7,14 +7,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "sales_purchase_order")
-public class SalesPurchaseOrder {
+@Table(name = "branch_purchase_frozen")
+public class BranchPurchaseFrozen {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,28 +20,9 @@ public class SalesPurchaseOrder {
     private Integer id;
 
     @NotNull
-    @Size(max = 30)
-    @Column(length = 30, nullable = false, unique = true)
-    private String purchaseNo;
-
-    @NotNull
     @Size(max = 20)
     @Column(length = 20, nullable = false)
     private String branchCode;
-
-    @NotNull
-    @Size(max = 20)
-    @Column(length = 20, nullable = false)
-    private String locationCode;
-
-    @NotNull
-    @Column(nullable = false)
-    private LocalDate purchaseDate;
-
-    @NotNull
-    @Size(max = 20)
-    @Column(length = 20, nullable = false)
-    private String purchaseUser;
 
     @NotNull
     @Column(nullable = false, columnDefinition = "boolean default false")

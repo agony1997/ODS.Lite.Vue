@@ -19,19 +19,19 @@ public class AuthUser {
     private Integer id;
 
     @NotNull
-    @Size(min = 1, max = 20)
+    @Size(max = 20)
     @Column(unique = true, length = 20, nullable = false)
-    private String accountCode;
+    private String empNo;
 
     @NotNull
     @Size(max = 50)
     @Column(unique = true, length = 50, nullable = false)
-    private String email; // Email
+    private String email;
 
     @NotNull
     @Size(max = 15)
     @Column(nullable = false, length = 15)
-    private String displayName;
+    private String empName;
 
     @NotNull
     @Size(max = 50)

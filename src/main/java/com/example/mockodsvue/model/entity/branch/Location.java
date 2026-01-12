@@ -1,4 +1,4 @@
-package com.example.mockodsvue.model.entity.purchase;
+package com.example.mockodsvue.model.entity.branch;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -7,14 +7,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "sales_purchase_order")
-public class SalesPurchaseOrder {
+@Table(name = "location", uniqueConstraints = @UniqueConstraint(columnNames = {"branch_code", "location_code"}))
+public class Location {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,9 +20,14 @@ public class SalesPurchaseOrder {
     private Integer id;
 
     @NotNull
-    @Size(max = 30)
-    @Column(length = 30, nullable = false, unique = true)
-    private String purchaseNo;
+    @Size(max = 20)
+    @Column(length = 20, nullable = false)
+    private String locationCode;
+
+    @NotNull
+    @Size(max = 40)
+    @Column(length = 40, nullable = false)
+    private String locationName;
 
     @NotNull
     @Size(max = 20)
@@ -33,20 +36,16 @@ public class SalesPurchaseOrder {
 
     @NotNull
     @Size(max = 20)
-    @Column(length = 20, nullable = false)
-    private String locationCode;
+    @Column(unique = true, length = 20, nullable = false)
+    private String empNo;
 
     @NotNull
-    @Column(nullable = false)
-    private LocalDate purchaseDate;
-
-    @NotNull
-    @Size(max = 20)
-    @Column(length = 20, nullable = false)
-    private String purchaseUser;
+    @Size(max = 15)
+    @Column(nullable = false, length = 15)
+    private String empName;
 
     @NotNull
     @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean isFrozen;
+    private boolean isEnable;
 
 }

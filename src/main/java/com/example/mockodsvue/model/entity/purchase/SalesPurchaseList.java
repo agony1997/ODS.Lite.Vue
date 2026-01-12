@@ -7,12 +7,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Table(name = "sales_purchase_order_detail", uniqueConstraints = @UniqueConstraint(columnNames = {"purchase_no", "product_code", "unit"}))
+
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-public class SalesPurchaseOrderDetail {
+@Table(name = "sales_purchase_list", uniqueConstraints = @UniqueConstraint(columnNames = {"location_code", "product_code", "unit"}))
+public class SalesPurchaseList {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,13 +21,9 @@ public class SalesPurchaseOrderDetail {
     private Integer id;
 
     @NotNull
-    @Size(max = 10)
-    @Column(nullable = false, length = 10)
-    private String purchaseNo;
-
-    @NotNull
-    @Column(nullable = false)
-    private int itemNo;
+    @Size(max = 20)
+    @Column(length = 20, nullable = false)
+    private String locationCode;
 
     @NotNull
     @Size(max = 20)
@@ -44,6 +41,6 @@ public class SalesPurchaseOrderDetail {
 
     @NotNull
     @Column(nullable = false, columnDefinition = "integer default 0")
-    private int confirmQty;
+    private int sortOrder;
 
 }

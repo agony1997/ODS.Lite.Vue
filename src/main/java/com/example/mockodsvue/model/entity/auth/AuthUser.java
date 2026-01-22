@@ -34,8 +34,8 @@ public class AuthUser {
     private String empName;
 
     @NotNull
-    @Size(max = 50)
-    @Column(nullable = false, length = 50)
+    @Size(max = 72)
+    @Column(nullable = false, length = 72)
     private String password;
 
 }

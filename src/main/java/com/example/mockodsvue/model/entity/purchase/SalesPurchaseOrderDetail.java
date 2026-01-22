@@ -20,8 +20,8 @@ public class SalesPurchaseOrderDetail {
     private Integer id;
 
     @NotNull
-    @Size(max = 10)
-    @Column(nullable = false, length = 10)
+    @Size(max = 30)
+    @Column(nullable = false, length = 30)
     private String purchaseNo;
 
     @NotNull

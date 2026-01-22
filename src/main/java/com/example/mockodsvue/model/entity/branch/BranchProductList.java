@@ -30,7 +30,7 @@ public class BranchProductList {
     private String productCode;
 
     @Size(max = 40)
-    @Column(length = 20, nullable = false)
+    @Column(length = 40, nullable = false)
     private String productName;
 
     @NotNull

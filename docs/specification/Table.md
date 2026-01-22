@@ -54,7 +54,9 @@ todo
 
 ## 取號表格
 
-todo
+> 詳見 [SequenceNumber.md](./SequenceNumber.md)
+
+> - 單據序號表 (document_sequence)
 
 ---
 

@@ -58,7 +58,12 @@
       "Bash(lsof:*)",
       "Bash(pgrep:*)",
       "Bash(xargs:*)",
-      "Bash(./stop-dev.sh:*)"
+      "Bash(./stop-dev.sh:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git stash:*)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch:*)",
+      "Bash(gh pr create:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

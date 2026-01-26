@@ -124,7 +124,7 @@ INSERT INTO sales_purchase_order_detail (purchase_no, item_no, product_code, uni
 
 -- sales_purchase_list (業務自訂訂貨清單)
 INSERT INTO sales_purchase_list (location_code, product_code, unit, qty, sort_order) VALUES ('1200', 'P001', '瓶', 50, 1);
-INSERT INTO sales_purchase_list (location_code, product_code, unit, qty, sort_order) VALUES ('1200', 'P004', '瓶', 30, 2);
+INSERT INTO sales_purchase_list (location_code, product_code, unit, qty, sort_order) VALUES ('1200', 'P004', '個', 30, 2);
 INSERT INTO sales_purchase_list (location_code, product_code, unit, qty, sort_order) VALUES ('1200', 'P006', '瓶', 100, 3);
 INSERT INTO sales_purchase_list (location_code, product_code, unit, qty, sort_order) VALUES ('2100', 'P001', '瓶', 80, 1);
 INSERT INTO sales_purchase_list (location_code, product_code, unit, qty, sort_order) VALUES ('2100', 'P003', '瓶', 40, 2);

@@ -117,11 +117,24 @@ public interface SequenceGenerator {
 
 ```java
 public enum SequenceType {
+    // SalesPurchaseOrder
     SPO("SPO", "業務員訂貨單"),
+    // BranchPurchaseFrozen
+    BPF("BPF", "營業所凍結單"),
+    // BranchPurchaseOrder
     BPO("BPO", "營業所訂貨單"),
-    FSO("FSO", "工廠出貨單"),
-    DSO("DSO", "配送單"),
-    ADJ("ADJ", "庫存調整單");
+    // FactoryDeliveryOrder
+    FDO("FDO", "工廠出貨單"),
+    // CustomerOrder
+    CO("CO", "客戶配送單"),
+    // SalesKeepRecord
+    SKR("SKR", "業務員寄庫單"),
+    // SalesReturnRecord
+    SRR("SRR", "業務員退庫單"),
+    // BranchReturnOrder
+    BRO("BRO", "營業所銷退單"),
+    // InventoryAdjustmentOrder
+    IAO("IAO", "庫存調整單");
 
     private final String code;
     private final String name;

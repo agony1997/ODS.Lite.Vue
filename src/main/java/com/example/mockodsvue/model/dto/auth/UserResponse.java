@@ -14,8 +14,9 @@ import java.util.List;
 public class UserResponse {
 
     private Integer id;
-    private String empNo;
+    private String userId;
     private String email;
-    private String empName;
+    private String userName;
+    private String branchCode;
     private List<String> roles;
 }

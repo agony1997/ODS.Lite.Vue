@@ -29,13 +29,17 @@ public class Branch {
     @Column(length = 40, nullable = false)
     private String branchName;
 
+    @Size(max = 200)
+    @Column(length = 200)
+    private String address;
+
+    @Size(max = 20)
+    @Column(length = 20)
+    private String phone;
+
     @NotNull
     @Size(max = 20)
     @Column(length = 20, nullable = false)
-    private String locationCode;
-
-    @NotNull
-    @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean isEnable;
+    private String status;
 
 }

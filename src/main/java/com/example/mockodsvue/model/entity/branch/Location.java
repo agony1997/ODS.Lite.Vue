@@ -1,5 +1,6 @@
 package com.example.mockodsvue.model.entity.branch;
 
+import com.example.mockodsvue.model.enums.LocationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -34,18 +35,18 @@ public class Location {
     @Column(length = 20, nullable = false)
     private String branchCode;
 
+    @Size(max = 20)
+    @Column(length = 20)
+    private String userId;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private LocationType locationType;
+
     @NotNull
     @Size(max = 20)
-    @Column(unique = true, length = 20, nullable = false)
-    private String empNo;
-
-    @NotNull
-    @Size(max = 15)
-    @Column(nullable = false, length = 15)
-    private String empName;
-
-    @NotNull
-    @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean isEnable;
+    @Column(length = 20, nullable = false)
+    private String status;
 
 }

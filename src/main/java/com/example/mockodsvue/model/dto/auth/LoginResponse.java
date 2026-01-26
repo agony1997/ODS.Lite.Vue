@@ -14,7 +14,8 @@ import java.util.List;
 public class LoginResponse {
 
     private String token;
-    private String empNo;
-    private String empName;
+    private String userId;
+    private String userName;
+    private String branchCode;
     private List<String> roles;
 }

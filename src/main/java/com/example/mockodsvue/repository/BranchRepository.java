@@ -12,5 +12,5 @@ public interface BranchRepository extends JpaRepository<Branch, Integer> {
 
     Optional<Branch> findByBranchCode(String branchCode);
 
-    List<Branch> findByIsEnableTrue();
+    List<Branch> findByStatus(String status);
 }

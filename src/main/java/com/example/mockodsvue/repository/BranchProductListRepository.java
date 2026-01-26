@@ -13,4 +13,6 @@ public interface BranchProductListRepository extends JpaRepository<BranchProduct
     List<BranchProductList> findByBranchCodeOrderBySortOrder(String branchCode);
 
     Optional<BranchProductList> findByBranchCodeAndProductCodeAndUnit(String branchCode, String productCode, String unit);
+
+    void deleteByBranchCode(String branchCode);
 }

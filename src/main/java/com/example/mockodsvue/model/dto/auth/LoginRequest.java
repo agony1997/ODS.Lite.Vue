@@ -6,8 +6,8 @@ import lombok.Data;
 @Data
 public class LoginRequest {
 
-    @NotBlank(message = "員工編號不可為空")
-    private String empNo;
+    @NotBlank(message = "使用者編號不可為空")
+    private String userId;
 
     @NotBlank(message = "密碼不可為空")
     private String password;

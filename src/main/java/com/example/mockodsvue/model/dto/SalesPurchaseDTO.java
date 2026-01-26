@@ -1,5 +1,6 @@
 package com.example.mockodsvue.model.dto;
 
+import com.example.mockodsvue.model.enums.FrozenStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,21 +19,27 @@ public class SalesPurchaseDTO {
     private String locationCode;
     private LocalDate purchaseDate;
     private String purchaseUser;
-    private boolean isFrozen;
+    /**
+     * 凍結狀態 (由 BPF 決定)
+     * null: 未凍結 (開放)
+     * FROZEN: 已凍結
+     * CONFIRMED: 已確認
+     */
+    private FrozenStatus frozenStatus;
     private List<SalesPurchaseDetailDTO> details;
 
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class SalesPurchaseDetailDTO {
+    public static class SalesPurchaseDetailDTO implements Sortable {
         private String purchaseNo;
         private int itemNo;
         private String productCode;
         private String productName;
         private String unit;
         private int qty;
-        private int confirmQty;
+        private int confirmedQty;
         private int lastQty;
         private int sortOrder;
     }

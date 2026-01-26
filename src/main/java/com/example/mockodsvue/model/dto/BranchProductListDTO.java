@@ -3,7 +3,7 @@ package com.example.mockodsvue.model.dto;
 import lombok.Data;
 
 @Data
-public class BranchProductListDTO {
+public class BranchProductListDTO implements Sortable {
     private String branchCode;
     private String productCode;
     private String productName;

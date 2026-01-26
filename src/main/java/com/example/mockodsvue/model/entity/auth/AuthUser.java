@@ -20,8 +20,8 @@ public class AuthUser {
 
     @NotNull
     @Size(max = 20)
-    @Column(unique = true, length = 20, nullable = false)
-    private String empNo;
+    @Column(name = "user_id", unique = true, length = 20, nullable = false)
+    private String userId;
 
     @NotNull
     @Size(max = 50)
@@ -30,12 +30,25 @@ public class AuthUser {
 
     @NotNull
     @Size(max = 15)
-    @Column(nullable = false, length = 15)
-    private String empName;
+    @Column(name = "user_name", nullable = false, length = 15)
+    private String userName;
 
     @NotNull
     @Size(max = 72)
     @Column(nullable = false, length = 72)
     private String password;
+
+    @Size(max = 20)
+    @Column(length = 20)
+    private String branchCode;
+
+    @Size(max = 20)
+    @Column(length = 20)
+    private String phone;
+
+    @NotNull
+    @Size(max = 20)
+    @Column(length = 20, nullable = false)
+    private String status;
 
 }

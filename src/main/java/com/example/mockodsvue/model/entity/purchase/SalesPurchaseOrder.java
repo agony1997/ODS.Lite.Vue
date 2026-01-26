@@ -8,7 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+/**
+ * 業務員訂貨單 (SPO)
+ * 注意：SPO 本身無狀態欄位，編輯權限由 BPF 控制，彙總狀態由 SPOD 追蹤
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -45,8 +50,20 @@ public class SalesPurchaseOrder {
     @Column(length = 20, nullable = false)
     private String purchaseUser;
 
-    @NotNull
-    @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean isFrozen;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

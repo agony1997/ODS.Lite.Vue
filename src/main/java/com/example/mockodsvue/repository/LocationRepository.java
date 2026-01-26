@@ -12,7 +12,7 @@ public interface LocationRepository extends JpaRepository<Location, Integer> {
 
     Optional<Location> findByLocationCode(String locationCode);
 
-    List<Location> findByBranchCodeAndIsEnableTrue(String branchCode);
+    List<Location> findByBranchCodeAndStatus(String branchCode, String status);
 
-    Optional<Location> findByEmpNo(String empNo);
+    Optional<Location> findByUserId(String userId);
 }

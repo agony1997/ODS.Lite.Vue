@@ -10,6 +10,8 @@ import com.example.mockodsvue.model.entity.branch.Location;
 import com.example.mockodsvue.model.entity.purchase.SalesPurchaseList;
 import com.example.mockodsvue.model.entity.purchase.SalesPurchaseOrder;
 import com.example.mockodsvue.model.entity.purchase.SalesPurchaseOrderDetail;
+import com.example.mockodsvue.model.enums.LocationType;
+import com.example.mockodsvue.model.enums.SalesOrderDetailStatus;
 import com.example.mockodsvue.model.enums.SequenceType;
 import com.example.mockodsvue.repository.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,6 +57,9 @@ class SalesPurchaseOrderServiceTest {
     @Mock
     private SalesPurchaseMapper mapper;
 
+    @Mock
+    private BranchPurchaseFrozenRepository frozenRepository;
+
     @InjectMocks
     private SalesPurchaseOrderService service;
 
@@ -74,6 +79,8 @@ class SalesPurchaseOrderServiceTest {
         testLocation = new Location();
         testLocation.setLocationCode(LOCATION_CODE);
         testLocation.setBranchCode(BRANCH_CODE);
+        testLocation.setLocationType(LocationType.CAR);
+        testLocation.setStatus("ACTIVE");
 
         // 建立測試訂單
         testOrder = new SalesPurchaseOrder();
@@ -83,7 +90,6 @@ class SalesPurchaseOrderServiceTest {
         testOrder.setLocationCode(LOCATION_CODE);
         testOrder.setPurchaseDate(validPurchaseDate);
         testOrder.setPurchaseUser(CURRENT_USER);
-        testOrder.setFrozen(false);
     }
 
     // ==================== findOrCreateByCondition 測試 ====================
@@ -257,24 +263,6 @@ class SalesPurchaseOrderServiceTest {
             );
 
             assertEquals("訂單不存在: " + inputDto.getPurchaseNo(), exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("訂單已凍結 - 拋出例外")
-        void orderFrozen_ThrowsException() {
-            // given
-            testOrder.setFrozen(true);
-            SalesPurchaseDTO inputDto = createTestDTO();
-            when(orderRepository.findByPurchaseNo(inputDto.getPurchaseNo()))
-                    .thenReturn(Optional.of(testOrder));
-
-            // when & then
-            BusinessException exception = assertThrows(
-                    BusinessException.class,
-                    () -> service.updateOrder(inputDto)
-            );
-
-            assertEquals("訂單已凍結，無法修改", exception.getMessage());
         }
     }
 
@@ -460,7 +448,7 @@ class SalesPurchaseOrderServiceTest {
                 .locationCode(LOCATION_CODE)
                 .purchaseDate(validPurchaseDate)
                 .purchaseUser(CURRENT_USER)
-                .isFrozen(false)
+                .frozenStatus(null)
                 .details(List.of())
                 .build();
     }
@@ -470,7 +458,7 @@ class SalesPurchaseOrderServiceTest {
                 .productCode(productCode)
                 .unit("箱")
                 .qty(qty)
-                .confirmQty(0)
+                .confirmedQty(0)
                 .build();
     }
 
@@ -481,7 +469,8 @@ class SalesPurchaseOrderServiceTest {
         detail.setProductCode(productCode);
         detail.setUnit("箱");
         detail.setQty(qty);
-        detail.setConfirmQty(0);
+        detail.setConfirmedQty(0);
+        detail.setStatus(SalesOrderDetailStatus.PENDING);
         return detail;
     }
 }

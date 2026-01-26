@@ -2,9 +2,9 @@ package com.example.mockodsvue.controller;
 
 import com.example.mockodsvue.model.dto.auth.LoginRequest;
 import com.example.mockodsvue.model.entity.auth.AuthUser;
-import com.example.mockodsvue.model.entity.auth.AuthUserRole;
+import com.example.mockodsvue.model.entity.auth.AuthUserBranchRole;
 import com.example.mockodsvue.repository.AuthUserRepository;
-import com.example.mockodsvue.repository.AuthUserRoleRepository;
+import com.example.mockodsvue.repository.AuthUserBranchRoleRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,7 +37,7 @@ class AuthControllerTest {
     private AuthUserRepository authUserRepository;
 
     @Autowired
-    private AuthUserRoleRepository authUserRoleRepository;
+    private AuthUserBranchRoleRepository authUserBranchRoleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -46,24 +46,26 @@ class AuthControllerTest {
     void setUp() {
         // 建立測試使用者
         AuthUser user = new AuthUser();
-        user.setEmpNo("E001");
+        user.setUserId("E001");
         user.setEmail("test@example.com");
-        user.setEmpName("測試使用者");
+        user.setUserName("測試使用者");
         user.setPassword(passwordEncoder.encode("password123"));
+        user.setStatus("ACTIVE");
         authUserRepository.save(user);
 
         // 建立角色關聯
-        AuthUserRole userRole = new AuthUserRole();
-        userRole.setEmpNo("E001");
+        AuthUserBranchRole userRole = new AuthUserBranchRole();
+        userRole.setUserId("E001");
+        userRole.setBranchCode("B001");
         userRole.setRoleCode("ADMIN");
-        authUserRoleRepository.save(userRole);
+        authUserBranchRoleRepository.save(userRole);
     }
 
     @Test
     @DisplayName("POST /api/auth/login - 登入成功")
     void login_Success() throws Exception {
         LoginRequest request = new LoginRequest();
-        request.setEmpNo("E001");
+        request.setUserId("E001");
         request.setPassword("password123");
 
         mockMvc.perform(post("/api/auth/login")
@@ -71,8 +73,8 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", notNullValue()))
-                .andExpect(jsonPath("$.empNo", is("E001")))
-                .andExpect(jsonPath("$.empName", is("測試使用者")))
+                .andExpect(jsonPath("$.userId", is("E001")))
+                .andExpect(jsonPath("$.userName", is("測試使用者")))
                 .andExpect(jsonPath("$.roles", hasItem("ADMIN")));
     }
 
@@ -80,7 +82,7 @@ class AuthControllerTest {
     @DisplayName("POST /api/auth/login - 密碼錯誤")
     void login_WrongPassword_Returns401() throws Exception {
         LoginRequest request = new LoginRequest();
-        request.setEmpNo("E001");
+        request.setUserId("E001");
         request.setPassword("wrongPassword");
 
         mockMvc.perform(post("/api/auth/login")
@@ -93,7 +95,7 @@ class AuthControllerTest {
     @DisplayName("POST /api/auth/login - 使用者不存在")
     void login_UserNotFound_Returns401() throws Exception {
         LoginRequest request = new LoginRequest();
-        request.setEmpNo("E999");
+        request.setUserId("E999");
         request.setPassword("password123");
 
         mockMvc.perform(post("/api/auth/login")
@@ -106,7 +108,7 @@ class AuthControllerTest {
     @DisplayName("POST /api/auth/login - 缺少必填欄位")
     void login_MissingFields_Returns400() throws Exception {
         LoginRequest request = new LoginRequest();
-        // 不設定 empNo 和 password
+        // 不設定 userId 和 password
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

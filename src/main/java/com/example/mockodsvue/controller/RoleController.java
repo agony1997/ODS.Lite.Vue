@@ -63,11 +63,14 @@ public class RoleController {
 
     /**
      * 移除使用者的角色
-     * DELETE /api/roles/assign/{empNo}/{roleCode}
+     * DELETE /api/roles/assign/{userId}/{branchCode}/{roleCode}
      */
-    @DeleteMapping("/assign/{empNo}/{roleCode}")
-    public ResponseEntity<Void> removeRole(@PathVariable String empNo, @PathVariable String roleCode) {
-        roleService.removeRoleFromUser(empNo, roleCode);
+    @DeleteMapping("/assign/{userId}/{branchCode}/{roleCode}")
+    public ResponseEntity<Void> removeRole(
+            @PathVariable String userId,
+            @PathVariable String branchCode,
+            @PathVariable String roleCode) {
+        roleService.removeRoleFromUser(userId, branchCode, roleCode);
         return ResponseEntity.noContent().build();
     }
 }

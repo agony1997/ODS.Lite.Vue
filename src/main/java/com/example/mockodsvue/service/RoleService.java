@@ -3,10 +3,10 @@ package com.example.mockodsvue.service;
 import com.example.mockodsvue.model.dto.auth.AssignRoleRequest;
 import com.example.mockodsvue.model.dto.auth.CreateRoleRequest;
 import com.example.mockodsvue.model.entity.auth.AuthRole;
-import com.example.mockodsvue.model.entity.auth.AuthUserRole;
+import com.example.mockodsvue.model.entity.auth.AuthUserBranchRole;
 import com.example.mockodsvue.repository.AuthRoleRepository;
 import com.example.mockodsvue.repository.AuthUserRepository;
-import com.example.mockodsvue.repository.AuthUserRoleRepository;
+import com.example.mockodsvue.repository.AuthUserBranchRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,7 @@ public class RoleService {
 
     private final AuthRoleRepository authRoleRepository;
     private final AuthUserRepository authUserRepository;
-    private final AuthUserRoleRepository authUserRoleRepository;
+    private final AuthUserBranchRoleRepository authUserBranchRoleRepository;
 
     /**
      * 新增角色
@@ -54,7 +54,7 @@ public class RoleService {
                 .orElseThrow(() -> new IllegalArgumentException("找不到角色: " + roleCode));
 
         // 先刪除角色關聯
-        authUserRoleRepository.deleteByRoleCode(roleCode);
+        authUserBranchRoleRepository.deleteByRoleCode(roleCode);
         // 再刪除角色
         authRoleRepository.delete(role);
     }
@@ -65,36 +65,37 @@ public class RoleService {
     @Transactional
     public void assignRoleToUser(AssignRoleRequest request) {
         // 檢查使用者是否存在
-        authUserRepository.findByEmpNo(request.getEmpNo())
-                .orElseThrow(() -> new IllegalArgumentException("找不到使用者: " + request.getEmpNo()));
+        authUserRepository.findByUserId(request.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("找不到使用者: " + request.getUserId()));
 
         // 檢查角色是否存在
         authRoleRepository.findByRoleCode(request.getRoleCode())
                 .orElseThrow(() -> new IllegalArgumentException("找不到角色: " + request.getRoleCode()));
 
         // 檢查是否已經有這個角色
-        boolean exists = authUserRoleRepository.findByEmpNo(request.getEmpNo()).stream()
+        boolean exists = authUserBranchRoleRepository.findByUserIdAndBranchCode(request.getUserId(), request.getBranchCode()).stream()
                 .anyMatch(ur -> ur.getRoleCode().equals(request.getRoleCode()));
 
         if (exists) {
-            throw new IllegalArgumentException("使用者已擁有此角色");
+            throw new IllegalArgumentException("使用者在此營業所已擁有此角色");
         }
 
         // 新增角色關聯
-        AuthUserRole userRole = new AuthUserRole();
-        userRole.setEmpNo(request.getEmpNo());
+        AuthUserBranchRole userRole = new AuthUserBranchRole();
+        userRole.setUserId(request.getUserId());
+        userRole.setBranchCode(request.getBranchCode());
         userRole.setRoleCode(request.getRoleCode());
-        authUserRoleRepository.save(userRole);
+        authUserBranchRoleRepository.save(userRole);
     }
 
     /**
      * 移除使用者的角色
      */
     @Transactional
-    public void removeRoleFromUser(String empNo, String roleCode) {
-        AuthUserRole userRole = authUserRoleRepository.findByEmpNoAndRoleCode(empNo, roleCode)
-                .orElseThrow(() -> new IllegalArgumentException("使用者沒有此角色"));
+    public void removeRoleFromUser(String userId, String branchCode, String roleCode) {
+        AuthUserBranchRole userRole = authUserBranchRoleRepository.findByUserIdAndBranchCodeAndRoleCode(userId, branchCode, roleCode)
+                .orElseThrow(() -> new IllegalArgumentException("使用者在此營業所沒有此角色"));
 
-        authUserRoleRepository.delete(userRole);
+        authUserBranchRoleRepository.delete(userRole);
     }
 }

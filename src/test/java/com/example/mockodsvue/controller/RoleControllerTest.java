@@ -56,17 +56,19 @@ class RoleControllerTest {
     void setUp() {
         // 建立使用者
         AuthUser admin = new AuthUser();
-        admin.setEmpNo("ADMIN001");
+        admin.setUserId("ADMIN001");
         admin.setEmail("admin@example.com");
-        admin.setEmpName("管理員");
+        admin.setUserName("管理員");
         admin.setPassword(passwordEncoder.encode("password"));
+        admin.setStatus("ACTIVE");
         authUserRepository.save(admin);
 
         AuthUser user = new AuthUser();
-        user.setEmpNo("USER001");
+        user.setUserId("USER001");
         user.setEmail("user@example.com");
-        user.setEmpName("一般使用者");
+        user.setUserName("一般使用者");
         user.setPassword(passwordEncoder.encode("password"));
+        user.setStatus("ACTIVE");
         authUserRepository.save(user);
 
         // 建立角色
@@ -131,7 +133,8 @@ class RoleControllerTest {
     @DisplayName("POST /api/roles/assign - ADMIN 指派角色給使用者")
     void assignRole_AsAdmin_Success() throws Exception {
         AssignRoleRequest request = new AssignRoleRequest();
-        request.setEmpNo("USER001");
+        request.setUserId("USER001");
+        request.setBranchCode("B001");
         request.setRoleCode("SALES");
 
         mockMvc.perform(post("/api/roles/assign")
@@ -145,7 +148,8 @@ class RoleControllerTest {
     @DisplayName("POST /api/roles/assign - 指派不存在的角色")
     void assignRole_RoleNotFound_Returns400() throws Exception {
         AssignRoleRequest request = new AssignRoleRequest();
-        request.setEmpNo("USER001");
+        request.setUserId("USER001");
+        request.setBranchCode("B001");
         request.setRoleCode("UNKNOWN");
 
         mockMvc.perform(post("/api/roles/assign")
@@ -156,9 +160,9 @@ class RoleControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/roles/assign/{empNo}/{roleCode} - 非 ADMIN 無權限")
+    @DisplayName("DELETE /api/roles/assign/{userId}/{branchCode}/{roleCode} - 非 ADMIN 無權限")
     void removeRole_AsUser_Returns403() throws Exception {
-        mockMvc.perform(delete("/api/roles/assign/USER001/SALES")
+        mockMvc.perform(delete("/api/roles/assign/USER001/B001/SALES")
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isForbidden());
     }

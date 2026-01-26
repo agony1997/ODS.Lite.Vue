@@ -3,9 +3,9 @@ package com.example.mockodsvue.service;
 import com.example.mockodsvue.model.dto.auth.LoginRequest;
 import com.example.mockodsvue.model.dto.auth.LoginResponse;
 import com.example.mockodsvue.model.entity.auth.AuthUser;
-import com.example.mockodsvue.model.entity.auth.AuthUserRole;
+import com.example.mockodsvue.model.entity.auth.AuthUserBranchRole;
 import com.example.mockodsvue.repository.AuthUserRepository;
-import com.example.mockodsvue.repository.AuthUserRoleRepository;
+import com.example.mockodsvue.repository.AuthUserBranchRoleRepository;
 import com.example.mockodsvue.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +24,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthUserRepository authUserRepository;
-    private final AuthUserRoleRepository authUserRoleRepository;
+    private final AuthUserBranchRoleRepository authUserBranchRoleRepository;
 
     /**
      * 登入
@@ -34,29 +34,30 @@ public class AuthService {
             // 1. 使用 Spring Security 驗證帳密
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getEmpNo(),
+                            request.getUserId(),
                             request.getPassword()
                     )
             );
 
             // 2. 查詢使用者資料
-            AuthUser user = authUserRepository.findByEmpNo(request.getEmpNo())
+            AuthUser user = authUserRepository.findByUserId(request.getUserId())
                     .orElseThrow(() -> new BadCredentialsException("使用者不存在"));
 
             // 3. 查詢角色
-            List<String> roles = authUserRoleRepository.findByEmpNo(request.getEmpNo())
+            List<String> roles = authUserBranchRoleRepository.findByUserId(request.getUserId())
                     .stream()
-                    .map(AuthUserRole::getRoleCode)
+                    .map(AuthUserBranchRole::getRoleCode)
                     .toList();
 
             // 4. 產生 JWT Token
-            String token = jwtTokenProvider.generateToken(user.getEmpNo(), roles);
+            String token = jwtTokenProvider.generateToken(user.getUserId(), roles);
 
             // 5. 回傳登入結果
             return LoginResponse.builder()
                     .token(token)
-                    .empNo(user.getEmpNo())
-                    .empName(user.getEmpName())
+                    .userId(user.getUserId())
+                    .userName(user.getUserName())
+                    .branchCode(user.getBranchCode())
                     .roles(roles)
                     .build();
 

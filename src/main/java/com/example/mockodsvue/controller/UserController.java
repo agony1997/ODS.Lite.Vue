@@ -42,24 +42,24 @@ public class UserController {
     }
 
     /**
-     * 根據員工編號查詢使用者
-     * GET /api/users/{empNo}
+     * 根據使用者編號查詢使用者
+     * GET /api/users/{userId}
      */
-    @GetMapping("/{empNo}")
-    @PreAuthorize("hasRole('ADMIN') or #empNo == authentication.name")
-    public ResponseEntity<UserResponse> getUser(@PathVariable String empNo) {
-        UserResponse user = userService.getUserByEmpNo(empNo);
+    @GetMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.name")
+    public ResponseEntity<UserResponse> getUser(@PathVariable String userId) {
+        UserResponse user = userService.getUserByUserId(userId);
         return ResponseEntity.ok(user);
     }
 
     /**
      * 刪除使用者
-     * DELETE /api/users/{empNo}
+     * DELETE /api/users/{userId}
      */
-    @DeleteMapping("/{empNo}")
+    @DeleteMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable String empNo) {
-        userService.deleteUser(empNo);
+    public ResponseEntity<Void> deleteUser(@PathVariable String userId) {
+        userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -7,6 +7,7 @@ import com.example.mockodsvue.model.entity.branch.BranchProductList;
 import com.example.mockodsvue.model.entity.purchase.SalesPurchaseList;
 import com.example.mockodsvue.model.entity.purchase.SalesPurchaseOrder;
 import com.example.mockodsvue.model.entity.purchase.SalesPurchaseOrderDetail;
+import com.example.mockodsvue.model.enums.SalesOrderDetailStatus;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public interface SalesPurchaseMapper {
     // ==================== Order 轉換 ====================
 
     @Mapping(target = "details", ignore = true)
+    @Mapping(target = "frozenStatus", ignore = true)
     SalesPurchaseDTO toDTO(SalesPurchaseOrder order);
 
     default SalesPurchaseDTO toDTO(SalesPurchaseOrder order,
@@ -62,14 +64,15 @@ public interface SalesPurchaseMapper {
 
     default SalesPurchaseOrderDetail toDetailEntity(String purchaseNo, int itemNo,
                                                      String productCode, String unit,
-                                                     int qty, int confirmQty) {
+                                                     int qty, int confirmedQty) {
         SalesPurchaseOrderDetail detail = new SalesPurchaseOrderDetail();
         detail.setPurchaseNo(purchaseNo);
         detail.setItemNo(itemNo);
         detail.setProductCode(productCode);
         detail.setUnit(unit);
         detail.setQty(qty);
-        detail.setConfirmQty(confirmQty);
+        detail.setConfirmedQty(confirmedQty);
+        detail.setStatus(SalesOrderDetailStatus.PENDING);
         return detail;
     }
 
@@ -78,7 +81,7 @@ public interface SalesPurchaseMapper {
         return java.util.stream.IntStream.range(0, dtoList.size())
                 .mapToObj(i -> {
                     SalesPurchaseDetailDTO d = dtoList.get(i);
-                    return toDetailEntity(purchaseNo, i + 1, d.getProductCode(), d.getUnit(), d.getQty(), d.getConfirmQty());
+                    return toDetailEntity(purchaseNo, i + 1, d.getProductCode(), d.getUnit(), d.getQty(), d.getConfirmedQty());
                 })
                 .toList();
     }

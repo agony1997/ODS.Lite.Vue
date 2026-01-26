@@ -6,9 +6,11 @@ import com.example.mockodsvue.model.dto.SalesPurchaseDTO;
 import com.example.mockodsvue.model.dto.SalesPurchaseListDTO;
 import com.example.mockodsvue.model.entity.branch.BranchProductList;
 import com.example.mockodsvue.model.entity.branch.Location;
+import com.example.mockodsvue.model.entity.purchase.BranchPurchaseFrozen;
 import com.example.mockodsvue.model.entity.purchase.SalesPurchaseList;
 import com.example.mockodsvue.model.entity.purchase.SalesPurchaseOrder;
 import com.example.mockodsvue.model.entity.purchase.SalesPurchaseOrderDetail;
+import com.example.mockodsvue.model.enums.FrozenStatus;
 import com.example.mockodsvue.model.enums.SequenceType;
 import com.example.mockodsvue.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -26,6 +29,7 @@ import java.util.stream.IntStream;
  * 業務員訂貨單服務
  * <p>
  * 負責處理業務員訂貨單的查詢、建立、更新，以及自定義產品清單的管理。
+ * 編輯權限由 BPF (營業所凍結單) 控制。
  * </p>
  */
 @Service
@@ -37,6 +41,7 @@ public class SalesPurchaseOrderService {
     private final SalesPurchaseOrderDetailRepository detailRepository;
     private final SalesPurchaseListRepository customListRepository;
     private final BranchProductListRepository branchProductRepository;
+    private final BranchPurchaseFrozenRepository frozenRepository;
     private final LocationRepository locationRepository;
     private final SequenceGenerator sequenceGenerator;
     private final SalesPurchaseMapper mapper;
@@ -85,7 +90,7 @@ public class SalesPurchaseOrderService {
     @Transactional
     public SalesPurchaseDTO updateOrder(SalesPurchaseDTO dto) {
         SalesPurchaseOrder order = getOrder(dto.getPurchaseNo());
-        validateNotFrozen(order);
+        validateNotFrozen(order.getBranchCode(), order.getPurchaseDate());
 
         List<SalesPurchaseOrderDetail> newDetails = mapper.toDetailEntities(dto.getPurchaseNo(), dto.getDetails());
         replaceDetails(dto.getPurchaseNo(), newDetails);
@@ -229,15 +234,34 @@ public class SalesPurchaseOrderService {
     }
 
     /**
-     * 驗證訂單是否已凍結
+     * 驗證營業所是否已凍結
+     * <p>
+     * 透過查詢 BPF (營業所凍結單) 判斷是否可編輯。
+     * BPF 不存在 = 可編輯，BPF 存在 = 已凍結不可編輯
+     * </p>
      *
-     * @param order 訂貨單
-     * @throws BusinessException 訂單已凍結
+     * @param branchCode   營業所代碼
+     * @param purchaseDate 訂貨日期
+     * @throws BusinessException 營業所已凍結
      */
-    private void validateNotFrozen(SalesPurchaseOrder order) {
-        if (order.isFrozen()) {
-            throw new BusinessException("訂單已凍結，無法修改");
+    private void validateNotFrozen(String branchCode, LocalDate purchaseDate) {
+        Optional<BranchPurchaseFrozen> frozen = frozenRepository.findByBranchCodeAndPurchaseDate(branchCode, purchaseDate);
+        if (frozen.isPresent()) {
+            throw new BusinessException("營業所已凍結，無法修改訂單");
         }
+    }
+
+    /**
+     * 查詢凍結狀態
+     *
+     * @param branchCode   營業所代碼
+     * @param purchaseDate 訂貨日期
+     * @return 凍結狀態，null 表示未凍結
+     */
+    private FrozenStatus getFrozenStatus(String branchCode, LocalDate purchaseDate) {
+        return frozenRepository.findByBranchCodeAndPurchaseDate(branchCode, purchaseDate)
+                .map(BranchPurchaseFrozen::getStatus)
+                .orElse(null);
     }
 
     // ==================== 私有方法 - 查詢 ====================
@@ -288,7 +312,6 @@ public class SalesPurchaseOrderService {
         order.setLocationCode(location.getLocationCode());
         order.setPurchaseDate(purchaseDate);
         order.setPurchaseUser(currentUser);
-        order.setFrozen(false);
         order = orderRepository.save(order);
 
         List<BranchProductList> branchProducts = branchProductRepository
@@ -350,7 +373,7 @@ public class SalesPurchaseOrderService {
                 .findByLocationCodeAndPurchaseDate(location.getLocationCode(), purchaseDate)
                 .orElseGet(() -> createOrder(location, purchaseDate, currentUser));
 
-        validateNotFrozen(order);
+        validateNotFrozen(order.getBranchCode(), order.getPurchaseDate());
 
         List<SalesPurchaseOrderDetail> newDetails = IntStream.range(0, sourceList.size())
                 .mapToObj(i -> {
@@ -383,7 +406,7 @@ public class SalesPurchaseOrderService {
     /**
      * 將訂單轉換為 DTO (已有明細)
      * <p>
-     * 補充產品名稱及前日訂購量後，委託 Mapper 組合成完整 DTO。
+     * 補充產品名稱、前日訂購量及凍結狀態後，委託 Mapper 組合成完整 DTO。
      * </p>
      *
      * @param order    訂貨單實體
@@ -401,7 +424,9 @@ public class SalesPurchaseOrderService {
 
         Map<String, Integer> lastQtyMap = getLastQtyMap(order.getLocationCode(), order.getPurchaseDate());
 
-        return mapper.toDTO(order, details, productMap, lastQtyMap);
+        SalesPurchaseDTO dto = mapper.toDTO(order, details, productMap, lastQtyMap);
+        dto.setFrozenStatus(getFrozenStatus(order.getBranchCode(), order.getPurchaseDate()));
+        return dto;
     }
 
     /**

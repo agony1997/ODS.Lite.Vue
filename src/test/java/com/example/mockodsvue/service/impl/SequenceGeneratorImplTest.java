@@ -201,8 +201,8 @@ class SequenceGeneratorImplTest {
 
                 // then
                 assertTrue(result.startsWith(type.getCode() + "-"));
-                assertTrue(result.matches("^[A-Z]{3}-\\d{8}-\\d{3}$"),
-                        "序號格式應為 XXX-YYYYMMDD-NNN，實際為: " + result);
+                assertTrue(result.matches("^[A-Z]{2,3}-\\d{8}-\\d{3}$"),
+                        "序號格式應為 XX(X)-YYYYMMDD-NNN，實際為: " + result);
             }
         }
     }
@@ -337,17 +337,17 @@ class SequenceGeneratorImplTest {
         @DisplayName("新建序號記錄並遞增")
         void newSequenceInitialValues() {
             // given
-            when(sequenceRepository.findByTypeAndDateWithLock(SequenceType.FSO.getCode(), testDate))
+            when(sequenceRepository.findByTypeAndDateWithLock(SequenceType.BPO.getCode(), testDate))
                     .thenReturn(Optional.empty());
             when(sequenceRepository.save(any(DocumentSequence.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // when
-            String result = sequenceGenerator.generate(SequenceType.FSO, testDate);
+            String result = sequenceGenerator.generate(SequenceType.BPO, testDate);
 
             // then
             // 驗證結果為第一個序號
-            assertEquals("FSO-20260125-001", result);
+            assertEquals("BPO-20260125-001", result);
             // 驗證 save 被呼叫兩次 (createNewSequence + doGenerate)
             verify(sequenceRepository, times(2)).save(any(DocumentSequence.class));
         }

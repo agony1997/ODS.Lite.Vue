@@ -88,6 +88,14 @@
             outline
             @click="showBpoDialog = true; fetchBpoList()"
           />
+          <q-btn
+            v-if="!summary.frozenStatus"
+            color="teal"
+            label="新增產品"
+            icon="add"
+            outline
+            @click="openAddProductDialog"
+          />
         </div>
       </q-card-section>
     </q-card>
@@ -135,6 +143,21 @@
                     v-slot:[`body-cell-loc_${loc.locationCode}`]="props">
             <q-td :props="props">
               {{ props.row.locationQtyMap?.[loc.locationCode] || 0 }}
+            </q-td>
+          </template>
+
+          <!-- 刪除按鈕 -->
+          <template v-slot:body-cell-actions="props">
+            <q-td :props="props">
+              <q-btn
+                v-if="!summary.frozenStatus"
+                icon="delete"
+                color="red"
+                flat
+                dense
+                round
+                @click="handleDeleteProduct(props.row)"
+              />
             </q-td>
           </template>
         </q-table>
@@ -199,6 +222,55 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <!-- 新增產品對話框 -->
+    <q-dialog v-model="showAddProductDialog">
+      <q-card style="min-width: 500px; max-width: 700px">
+        <q-card-section class="row items-center">
+          <div class="text-h6">新增產品</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-input
+            v-model="productFilter"
+            label="搜尋產品"
+            dense
+            outlined
+            class="q-mb-md"
+            clearable
+          >
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+
+          <q-table
+            :rows="filteredBranchProducts"
+            :columns="addProductColumns"
+            row-key="productCode"
+            dense
+            flat
+            bordered
+            :pagination="{ rowsPerPage: 15 }"
+            selection="multiple"
+            v-model:selected="selectedProducts"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="取消" v-close-popup />
+          <q-btn
+            color="primary"
+            label="加入選取的產品"
+            icon="add"
+            :disable="selectedProducts.length === 0"
+            @click="handleAddProducts"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -206,6 +278,7 @@
 import { ref, computed, onMounted } from 'vue'
 import * as branchApi from '../api/branch'
 import * as branchPurchaseApi from '../api/branchPurchase'
+import * as branchProductListApi from '../api/branchProductList'
 
 // 搜尋表單
 const searchForm = ref({
@@ -259,7 +332,8 @@ const tableColumns = computed(() => {
     { name: 'unit', label: '單位', field: 'unit', align: 'center' },
     { name: 'confirmedQty', label: '確認數量', field: 'confirmedQty', align: 'right' },
     { name: 'totalQty', label: '原始數量', field: 'totalQty', align: 'right' },
-    { name: 'diffQty', label: '增減', field: 'diffQty', align: 'right' }
+    { name: 'diffQty', label: '增減', field: 'diffQty', align: 'right' },
+    { name: 'actions', label: '操作', align: 'center' }
   ]
 
   // 動態加入儲位欄位
@@ -445,6 +519,65 @@ async function fetchBpoList() {
     )
   } catch (e) {
     console.error('查詢 BPO 失敗:', e)
+  }
+}
+
+// 新增產品對話框
+const showAddProductDialog = ref(false)
+const branchProducts = ref([])
+const selectedProducts = ref([])
+const productFilter = ref('')
+
+const addProductColumns = [
+  { name: 'productCode', label: '產品代碼', field: 'productCode', align: 'left', sortable: true },
+  { name: 'productName', label: '產品名稱', field: 'productName', align: 'left' },
+  { name: 'unit', label: '單位', field: 'unit', align: 'center' }
+]
+
+const filteredBranchProducts = computed(() => {
+  const existingCodes = new Set(summary.value?.details?.map(d => d.productCode) || [])
+  let list = branchProducts.value.filter(p => !existingCodes.has(p.productCode))
+  if (productFilter.value) {
+    const kw = productFilter.value.toLowerCase()
+    list = list.filter(p =>
+      p.productCode.toLowerCase().includes(kw) ||
+      (p.productName && p.productName.toLowerCase().includes(kw))
+    )
+  }
+  return list
+})
+
+async function openAddProductDialog() {
+  showAddProductDialog.value = true
+  selectedProducts.value = []
+  productFilter.value = ''
+  try {
+    branchProducts.value = await branchProductListApi.getByBranchCode(searchForm.value.branchCode)
+  } catch (e) {
+    alert(e.message)
+  }
+}
+
+function handleAddProducts() {
+  if (!summary.value || selectedProducts.value.length === 0) return
+  for (const p of selectedProducts.value) {
+    summary.value.details.push({
+      productCode: p.productCode,
+      productName: p.productName,
+      unit: p.unit,
+      confirmedQty: 0,
+      totalQty: 0,
+      locationQtyMap: {}
+    })
+  }
+  showAddProductDialog.value = false
+}
+
+function handleDeleteProduct(row) {
+  if (!confirm(`確定要移除產品 ${row.productCode} - ${row.productName}？`)) return
+  const idx = summary.value.details.findIndex(d => d.productCode === row.productCode)
+  if (idx >= 0) {
+    summary.value.details.splice(idx, 1)
   }
 }
 

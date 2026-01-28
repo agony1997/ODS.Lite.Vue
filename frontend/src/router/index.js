@@ -9,25 +9,25 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false, title: '登入' }
   },
   {
     path: '/',
     name: 'index',
     component: IndexView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/purchase-branch',
-    name: 'purchase-branch',
-    component: PurchaseBranchView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: '首頁', icon: 'home' }
   },
   {
     path: '/purchase-sales',
     name: 'purchase-sales',
     component: PurchaseSalesView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: '業務員訂貨', icon: 'shopping_cart', roles: ['SALES', 'LEADER', 'ADMIN'] }
+  },
+  {
+    path: '/purchase-branch',
+    name: 'purchase-branch',
+    component: PurchaseBranchView,
+    meta: { requiresAuth: true, title: '營業所訂貨彙總', icon: 'shopping_cart', roles: ['LEADER', 'ADMIN'] }
   }
 ]
 
@@ -45,6 +45,18 @@ router.beforeEach((to) => {
 
   if (to.path === '/login' && token) {
     return '/'
+  }
+
+  if (to.meta.roles && to.meta.roles.length > 0 && token) {
+    const savedUser = localStorage.getItem('mock_ods_user')
+    if (savedUser) {
+      const user = JSON.parse(savedUser)
+      const userRoles = user.roles || []
+      const hasRole = to.meta.roles.some(role => userRoles.includes(role))
+      if (!hasRole) {
+        return '/'
+      }
+    }
   }
 })
 

@@ -1,0 +1,11 @@
+[
+    {"step": "確認 SecurityConfig 已有 @EnableMethodSecurity", "done": true},
+    {"step": "BranchController 加上 @PreAuthorize(\"isAuthenticated()\")", "done": true},
+    {"step": "BranchProductListController GET 加上 isAuthenticated, PUT/POST 加上 ADMIN/LEADER", "done": true},
+    {"step": "BranchPurchaseController class-level 加上 ADMIN/LEADER", "done": true},
+    {"step": "SalesPurchaseController class-level 加上 ADMIN/LEADER/SALES", "done": true},
+    {"step": "AuthController 保持公開（不加限制）", "done": true},
+    {"step": "RoleController 已有 ADMIN 權限（無需修改）", "done": true},
+    {"step": "UserController 已有 method-level ADMIN 權限（無需修改）", "done": true},
+    {"step": "編譯通過 mvnw.cmd compile", "done": true}
+]

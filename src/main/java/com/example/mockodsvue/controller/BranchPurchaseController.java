@@ -8,6 +8,7 @@ import com.example.mockodsvue.model.dto.BranchPurchaseSummaryUpdateDTO;
 import com.example.mockodsvue.service.BranchPurchaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/purchase/branch")
+@PreAuthorize("hasAnyRole('ADMIN', 'LEADER')")
 public class BranchPurchaseController {
 
     private final BranchPurchaseService branchPurchaseService;

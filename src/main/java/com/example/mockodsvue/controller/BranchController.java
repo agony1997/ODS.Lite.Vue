@@ -4,6 +4,7 @@ import com.example.mockodsvue.model.entity.branch.Branch;
 import com.example.mockodsvue.repository.BranchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/branches")
+@PreAuthorize("isAuthenticated()")
 public class BranchController {
 
     private final BranchRepository branchRepository;

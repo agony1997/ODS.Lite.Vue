@@ -5,6 +5,7 @@ import com.example.mockodsvue.model.entity.branch.BranchProductList;
 import com.example.mockodsvue.service.BranchProductListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class BranchProductListController {
      * GET /api/branch-product-list/{branchCode}
      */
     @GetMapping("/{branchCode}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<BranchProductList>> getByBranchCode(@PathVariable String branchCode) {
         List<BranchProductList> result = branchProductListService.getBranchProductList(branchCode);
         return ResponseEntity.ok(result);
@@ -31,6 +33,7 @@ public class BranchProductListController {
      * PUT /api/branch-product-list/{branchCode}
      */
     @PutMapping("/{branchCode}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LEADER')")
     public ResponseEntity<List<BranchProductList>> save(
             @PathVariable String branchCode,
             @RequestBody List<BranchProductListDTO> list) {
@@ -43,6 +46,7 @@ public class BranchProductListController {
      * POST /api/branch-product-list/copy
      */
     @PostMapping("/copy")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LEADER')")
     public ResponseEntity<List<BranchProductList>> copy(
             @RequestParam String from,
             @RequestParam String to) {

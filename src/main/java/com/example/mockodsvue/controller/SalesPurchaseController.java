@@ -5,6 +5,7 @@ import com.example.mockodsvue.model.dto.SalesPurchaseListDTO;
 import com.example.mockodsvue.service.SalesPurchaseOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/purchase/sales")
+@PreAuthorize("hasAnyRole('ADMIN', 'LEADER', 'SALES')")
 public class SalesPurchaseController {
 
     private final SalesPurchaseOrderService salesPurchaseOrderService;

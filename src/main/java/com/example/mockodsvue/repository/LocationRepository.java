@@ -15,4 +15,9 @@ public interface LocationRepository extends JpaRepository<Location, Integer> {
     List<Location> findByBranchCodeAndStatus(String branchCode, String status);
 
     Optional<Location> findByUserId(String userId);
+
+    /**
+     * 依營業所代碼查詢所有儲位
+     */
+    List<Location> findByBranchCode(String branchCode);
 }

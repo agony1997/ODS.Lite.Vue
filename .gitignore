@@ -43,3 +43,4 @@ src/main/resources/static/index.html
 
 ### Temp files ###
 tmpclaude-*
+.subtask/

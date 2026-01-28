@@ -1,25 +1,25 @@
 package com.example.mockodsvue.model.entity.purchase;
 
+import com.example.mockodsvue.model.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * 業務員訂貨單 (SPO)
  * 注意：SPO 本身無狀態欄位，編輯權限由 BPF 控制，彙總狀態由 SPOD 追蹤
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "sales_purchase_order")
-public class SalesPurchaseOrder {
+public class SalesPurchaseOrder extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,21 +49,4 @@ public class SalesPurchaseOrder {
     @Size(max = 20)
     @Column(length = 20, nullable = false)
     private String purchaseUser;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

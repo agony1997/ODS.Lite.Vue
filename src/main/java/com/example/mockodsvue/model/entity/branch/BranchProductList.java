@@ -1,21 +1,22 @@
 package com.example.mockodsvue.model.entity.branch;
 
+import com.example.mockodsvue.model.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "branch_product_list", uniqueConstraints = @UniqueConstraint(columnNames = {"branch_code", "product_code", "unit"}))
-public class BranchProductList {
+public class BranchProductList extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Integer id;
 
@@ -41,5 +42,4 @@ public class BranchProductList {
     @NotNull
     @Column(nullable = false, columnDefinition = "integer default 0")
     private int sortOrder;
-
 }

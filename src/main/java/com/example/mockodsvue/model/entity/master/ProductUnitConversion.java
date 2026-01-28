@@ -1,20 +1,21 @@
 package com.example.mockodsvue.model.entity.master;
 
+import com.example.mockodsvue.model.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "product_unit_conversion", uniqueConstraints = @UniqueConstraint(columnNames = {"product_code", "from_unit", "to_unit"}))
-public class ProductUnitConversion {
+public class ProductUnitConversion extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

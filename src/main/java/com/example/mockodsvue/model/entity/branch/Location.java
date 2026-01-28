@@ -1,19 +1,20 @@
 package com.example.mockodsvue.model.entity.branch;
 
+import com.example.mockodsvue.model.entity.BaseEntity;
 import com.example.mockodsvue.model.enums.LocationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "location", uniqueConstraints = @UniqueConstraint(columnNames = {"branch_code", "location_code"}))
-public class Location {
+public class Location extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,5 +49,4 @@ public class Location {
     @Size(max = 20)
     @Column(length = 20, nullable = false)
     private String status;
-
 }

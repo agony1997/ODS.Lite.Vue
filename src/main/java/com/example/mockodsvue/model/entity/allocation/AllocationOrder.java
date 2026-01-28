@@ -1,21 +1,21 @@
 package com.example.mockodsvue.model.entity.allocation;
 
+import com.example.mockodsvue.model.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "allocation_order")
-public class AllocationOrder {
+public class AllocationOrder extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,16 +34,4 @@ public class AllocationOrder {
     @NotNull
     @Column(nullable = false)
     private LocalDate allocationDate;
-
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
-
-    @Size(max = 20)
-    @Column(length = 20)
-    private String createdBy;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

@@ -1,22 +1,22 @@
 package com.example.mockodsvue.model.entity.delivery;
 
+import com.example.mockodsvue.model.entity.BaseEntity;
 import com.example.mockodsvue.model.enums.PreOrderStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "customer_pre_order")
-public class CustomerPreOrder {
+public class CustomerPreOrder extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,12 +54,4 @@ public class CustomerPreOrder {
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
     private PreOrderStatus status;
-
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

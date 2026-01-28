@@ -1,22 +1,22 @@
 package com.example.mockodsvue.model.entity.purchase;
 
+import com.example.mockodsvue.model.entity.BaseEntity;
 import com.example.mockodsvue.model.enums.DeliveryStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "branch_purchase_order")
-public class BranchPurchaseOrder {
+public class BranchPurchaseOrder extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,16 +45,4 @@ public class BranchPurchaseOrder {
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
     private DeliveryStatus status;
-
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
-
-    @Size(max = 20)
-    @Column(length = 20)
-    private String createdBy;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

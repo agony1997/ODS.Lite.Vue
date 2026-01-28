@@ -1,12 +1,11 @@
 package com.example.mockodsvue.model.entity.purchase;
 
+import com.example.mockodsvue.model.entity.BaseEntity;
 import com.example.mockodsvue.model.enums.FrozenStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,12 +14,14 @@ import java.time.LocalDateTime;
  * 營業所凍結單 (BPF)
  * 用於控制營業所某日期的訂單編輯權限
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "branch_purchase_frozen", uniqueConstraints = @UniqueConstraint(columnNames = {"branch_code", "purchase_date"}))
-public class BranchPurchaseFrozen {
+public class BranchPurchaseFrozen extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

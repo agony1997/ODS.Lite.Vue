@@ -1,19 +1,19 @@
 package com.example.mockodsvue.model.entity.purchase;
 
+import com.example.mockodsvue.model.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "sales_purchase_list", uniqueConstraints = @UniqueConstraint(columnNames = {"location_code", "product_code", "unit"}))
-public class SalesPurchaseList {
+public class SalesPurchaseList extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,5 +42,4 @@ public class SalesPurchaseList {
     @NotNull
     @Column(nullable = false, columnDefinition = "integer default 0")
     private int sortOrder;
-
 }

@@ -11,7 +11,7 @@
           </q-card-section>
           <q-card-section>
             <div class="q-mb-sm">
-              <strong>帳號：</strong>{{ authStore.user?.userId }}
+              <strong>帳號：</strong>{{ authStore.user?.userCode }}
             </div>
             <div class="q-mb-sm">
               <strong>營業所代碼：</strong>{{ authStore.user?.branchCode }}

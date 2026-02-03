@@ -276,9 +276,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useNotify } from '../composables/useNotify'
 import * as branchApi from '../api/branch'
 import * as branchPurchaseApi from '../api/branchPurchase'
 import * as branchProductListApi from '../api/branchProductList'
+
+const { notifyWarning, handleError, confirmAction } = useNotify()
 
 // 搜尋表單
 const searchForm = ref({
@@ -390,7 +393,7 @@ async function loadBranches() {
       searchForm.value.branchCode = branchOptions.value[0].value
     }
   } catch (e) {
-    console.error('載入營業所失敗:', e)
+    handleError(e)
   }
 }
 
@@ -406,7 +409,7 @@ async function fetchSummary() {
       searchForm.value.date
     )
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     loading.value = false
   }
@@ -414,7 +417,8 @@ async function fetchSummary() {
 
 // 凍結
 async function handleFreeze() {
-  if (!confirm('確定要凍結此營業所的訂單嗎？凍結後業務員將無法修改。')) return
+  const ok = await confirmAction('確定要凍結此營業所的訂單嗎？凍結後業務員將無法修改。')
+  if (!ok) return
 
   actionLoading.value = true
   try {
@@ -423,7 +427,7 @@ async function handleFreeze() {
       searchForm.value.date
     )
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     actionLoading.value = false
   }
@@ -431,7 +435,8 @@ async function handleFreeze() {
 
 // 解除凍結
 async function handleUnfreeze() {
-  if (!confirm('確定要解除凍結嗎？業務員將可以再次修改訂單。')) return
+  const ok = await confirmAction('確定要解除凍結嗎？業務員將可以再次修改訂單。')
+  if (!ok) return
 
   actionLoading.value = true
   try {
@@ -441,7 +446,7 @@ async function handleUnfreeze() {
     )
     dirtyRows.value.clear()
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     actionLoading.value = false
   }
@@ -450,10 +455,11 @@ async function handleUnfreeze() {
 // 確認完成
 async function handleConfirm() {
   if (dirtyRows.value.size > 0) {
-    alert('請先儲存變更後再確認')
+    notifyWarning('請先儲存變更後再確認')
     return
   }
-  if (!confirm('確定要確認完成嗎？確認後將無法再修改確認數量。')) return
+  const ok = await confirmAction('確定要確認完成嗎？確認後將無法再修改確認數量。')
+  if (!ok) return
 
   actionLoading.value = true
   try {
@@ -462,7 +468,7 @@ async function handleConfirm() {
       searchForm.value.date
     )
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     actionLoading.value = false
   }
@@ -470,7 +476,8 @@ async function handleConfirm() {
 
 // 執行彙總
 async function handleAggregate() {
-  if (!confirm('確定要執行彙總嗎？將會建立 BPO 訂貨單。')) return
+  const ok = await confirmAction('確定要執行彙總嗎？將會建立 BPO 訂貨單。')
+  if (!ok) return
 
   actionLoading.value = true
   try {
@@ -481,7 +488,7 @@ async function handleAggregate() {
     showBpoDialog.value = true
     await fetchSummary()
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     actionLoading.value = false
   }
@@ -504,7 +511,7 @@ async function handleSave() {
     })
     dirtyRows.value.clear()
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     saveLoading.value = false
   }
@@ -518,7 +525,7 @@ async function fetchBpoList() {
       searchForm.value.date
     )
   } catch (e) {
-    console.error('查詢 BPO 失敗:', e)
+    handleError(e)
   }
 }
 
@@ -554,7 +561,7 @@ async function openAddProductDialog() {
   try {
     branchProducts.value = await branchProductListApi.getByBranchCode(searchForm.value.branchCode)
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   }
 }
 
@@ -573,8 +580,9 @@ function handleAddProducts() {
   showAddProductDialog.value = false
 }
 
-function handleDeleteProduct(row) {
-  if (!confirm(`確定要移除產品 ${row.productCode} - ${row.productName}？`)) return
+async function handleDeleteProduct(row) {
+  const ok = await confirmAction(`確定要移除產品 ${row.productCode} - ${row.productName}？`)
+  if (!ok) return
   const idx = summary.value.details.findIndex(d => d.productCode === row.productCode)
   if (idx >= 0) {
     summary.value.details.splice(idx, 1)

@@ -56,7 +56,7 @@
 │  └──────┬───────┘  └──────────────┘                  │
 │         │                                            │
 │  ┌──────▼───────┐                                    │
-│  │ Entity       │  JPA 實體 (繼承 BaseEntity)         │
+│  │ Entity       │  JPA 實體 (繼承 AuditEntity)         │
 │  └──────────────┘                                    │
 └────────────────────┬────────────────────────────────┘
                      │
@@ -94,7 +94,7 @@
 
 | 設計模式 | 應用 |
 |---------|------|
-| **Audit Trail** | BaseEntity 自動記錄 createdAt/updatedAt/createdBy/updatedBy |
+| **Audit Trail** | AuditEntity 自動記錄 createdAt/updatedAt/createdBy/updatedBy |
 | **樂觀鎖** | DocumentSequence 使用 `@Version` 避免序號衝突 |
 | **狀態機** | BPF (FROZEN→CONFIRMED)、SPO Detail (PENDING→AGGREGATED) |
 | **序號產生器** | SequenceGenerator 依單據類型+日期自動產號 |
@@ -173,7 +173,7 @@ Phase 6: 主檔管理與系統完善  ← CRUD 管理頁面、報表
 | 0-1 | 登入頁面 | 前端 | 建立 LoginView.vue，呼叫 `/api/auth/login`，JWT 存入 localStorage | 無 |
 | 0-2 | 前端路由守衛 | 前端 | Router beforeEach 驗證 token，未登入導向登入頁 | 0-1 |
 | 0-3 | API 請求攔截器 | 前端 | 封裝 fetch 工具函式，自動帶入 Authorization header，處理 401 | 0-1 |
-| 0-4 | 全域使用者狀態 | 前端 | 使用 reactive 或 Pinia 儲存登入使用者資訊 (userId, branchCode, roles) | 0-1 |
+| 0-4 | 全域使用者狀態 | 前端 | 使用 reactive 或 Pinia 儲存登入使用者資訊 (userCode, branchCode, roles) | 0-1 |
 | 0-5 | 側邊導航選單 | 前端 | 改用 Quasar QLayout + QDrawer，依角色動態顯示功能選單 | 0-4 |
 | 0-6 | 首頁儀表板 | 前端 | IndexView 改為簡易儀表板，顯示待辦事項摘要 | 0-5 |
 | 0-7 | 後端權限註解 | 後端 | Controller 加上 `@PreAuthorize` 角色限制 | 無 |
@@ -434,7 +434,7 @@ Phase 6: 主檔管理（可與 Phase 2+ 並行）──┘
 
 | 分類 | 路徑 |
 |------|------|
-| Entity 基類 | `src/main/java/.../model/entity/BaseEntity.java` |
+| Entity 基類 | `src/main/java/.../model/entity/AuditEntity.java` |
 | 安全設定 | `src/main/java/.../config/SecurityConfig.java` |
 | JWT 處理 | `src/main/java/.../security/JwtTokenProvider.java` |
 | 序號產生器 | `src/main/java/.../service/impl/SequenceGeneratorImpl.java` |

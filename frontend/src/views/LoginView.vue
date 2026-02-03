@@ -9,7 +9,7 @@
       <q-card-section>
         <q-form @submit.prevent="handleLogin" class="q-gutter-md">
           <q-input
-            v-model="userId"
+            v-model="userCode"
             label="使用者帳號"
             outlined
             :rules="[val => !!val || '請輸入帳號']"
@@ -64,7 +64,7 @@ import { useAuthStore } from '@/stores/auth'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const userId = ref('')
+const userCode = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const loading = ref(false)
@@ -80,7 +80,7 @@ async function handleLogin() {
   errorMessage.value = ''
   loading.value = true
   try {
-    await authStore.login(userId.value, password.value)
+    await authStore.login(userCode.value, password.value)
     router.replace('/')
   } catch (e) {
     errorMessage.value = e.message || '登入失敗，請檢查帳號密碼'

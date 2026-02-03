@@ -21,11 +21,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function login(userId, password) {
-    const data = await loginApi(userId, password)
+  async function login(userCode, password) {
+    const data = await loginApi(userCode, password)
     token.value = data.token
     user.value = {
-      userId: data.userId,
+      userCode: data.userCode,
       userName: data.userName,
       branchCode: data.branchCode,
       roles: data.roles

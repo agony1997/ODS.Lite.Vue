@@ -16,22 +16,6 @@
     ]
   },
   "enabledPlugins": {
-    "all-skills": true,
-    "core_ddd-delivery@all-skills": true,
-    "tools_api-docs@all-skills": false,
-    "tools_business-report@all-skills": false,
-    "tools_chart-generator@all-skills": false,
-    "tools_excel-converter@all-skills": false,
-    "tools_markdown-converter@all-skills": false,
-    "tools_pdf-processor@all-skills": false,
-    "tools_tech-presentation@all-skills": false,
-    "core_system-design@all-skills": true,
-    "core_testing-review@all-skills": true,
-    "db_postgresql@all-skills": true,
-    "db_schema-design@all-skills": true,
-    "frontend_quasar@all-skills": true,
-    "frontend_typescript@all-skills": true,
-    "frontend_vue@all-skills": true,
-    "core_spring-boot@all-skills": true
+    "all-skills": true
   }
 }

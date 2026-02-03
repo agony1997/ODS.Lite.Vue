@@ -1,6 +1,7 @@
 import router from '@/router'
 
 const TOKEN_KEY = 'mock_ods_token'
+const REQUEST_TIMEOUT = 30000
 
 function getToken() {
   return localStorage.getItem(TOKEN_KEY)
@@ -23,7 +24,29 @@ async function request(url, options = {}) {
     headers['Content-Type'] = 'application/json'
   }
 
-  const response = await fetch(url, { ...options, headers })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
+
+  let response
+  try {
+    if (import.meta.env.DEV) {
+      console.log(`[HTTP] ${options.method || 'GET'} ${url}`)
+    }
+
+    response = await fetch(url, { ...options, headers, signal: controller.signal })
+  } catch (err) {
+    clearTimeout(timeoutId)
+    if (err.name === 'AbortError') {
+      throw new Error('請求逾時，請稍後再試')
+    }
+    throw new Error('網路連線失敗，請檢查網路狀態')
+  } finally {
+    clearTimeout(timeoutId)
+  }
+
+  if (import.meta.env.DEV) {
+    console.log(`[HTTP] ${response.status} ${url}`)
+  }
 
   if (response.status === 401) {
     clearAuth()
@@ -31,9 +54,21 @@ async function request(url, options = {}) {
     throw new Error('未授權，請重新登入')
   }
 
+  if (response.status === 403) {
+    throw new Error('權限不足，無法執行此操作')
+  }
+
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.message || `請求失敗 (${response.status})`)
+    let message = `請求失敗 (${response.status})`
+    try {
+      const error = await response.json()
+      if (error.message) {
+        message = error.message
+      }
+    } catch {
+      // 非 JSON 回應，使用預設訊息
+    }
+    throw new Error(message)
   }
 
   if (response.status === 204) {

@@ -65,11 +65,11 @@
           bordered
           :pagination="{ rowsPerPage: 50 }"
         >
-          <template v-slot:body-cell-orderQty="props">
+          <template v-slot:body-cell-qty="props">
             <q-td :props="props">
               <q-input
                 v-if="!isFrozen"
-                v-model.number="props.row.orderQty"
+                v-model.number="props.row.qty"
                 type="number"
                 dense
                 outlined
@@ -77,21 +77,10 @@
                 style="width: 90px"
                 @update:model-value="markDirty(props.row)"
               />
-              <span v-else>{{ props.row.orderQty }}</span>
+              <span v-else>{{ props.row.qty }}</span>
             </q-td>
           </template>
 
-          <template v-slot:body-cell-status="props">
-            <q-td :props="props">
-              <q-chip
-                size="sm"
-                :color="props.row.status === 'AGGREGATED' ? 'green' : 'orange'"
-                text-color="white"
-              >
-                {{ props.row.status === 'AGGREGATED' ? '已彙總' : '待處理' }}
-              </q-chip>
-            </q-td>
-          </template>
         </q-table>
 
         <div class="q-mt-md row q-gutter-md">
@@ -205,12 +194,10 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useAuthStore } from '../stores/auth'
+import { useNotify } from '../composables/useNotify'
 import * as salesPurchaseApi from '../api/salesPurchase'
 
-const authStore = useAuthStore()
-const branchCode = computed(() => authStore.user?.branchCode)
-const salesEmpNo = computed(() => authStore.user?.userId)
+const { notifySuccess, notifyWarning, handleError } = useNotify()
 
 // 日期選項 D+2 ~ D+9
 function buildDateOptions() {
@@ -230,23 +217,24 @@ const dateOptions = buildDateOptions()
 const selectedDate = ref(dateOptions[0].value)
 
 // 資料狀態
-const details = ref([])
+const orderData = ref(null)
+const details = computed(() => orderData.value?.details || [])
 const loading = ref(false)
 const loadLoading = ref(false)
 const saveLoading = ref(false)
 const dirtyRows = ref(new Set())
 
-// 凍結判斷
-const isFrozen = computed(() => details.value.some(d => d.frozen))
+// 凍結判斷（由後端 frozenStatus 決定）
+const isFrozen = computed(() => !!orderData.value?.frozenStatus)
 
-// 表格欄位
+// 表格欄位（對應 SalesPurchaseDetailDTO）
 const tableColumns = [
   { name: 'productCode', label: '產品代碼', field: 'productCode', align: 'left', sortable: true },
   { name: 'productName', label: '產品名稱', field: 'productName', align: 'left' },
   { name: 'unit', label: '單位', field: 'unit', align: 'center' },
-  { name: 'orderQty', label: '訂貨數量', field: 'orderQty', align: 'right' },
+  { name: 'qty', label: '訂貨數量', field: 'qty', align: 'right' },
   { name: 'confirmedQty', label: '確認數量', field: 'confirmedQty', align: 'right' },
-  { name: 'status', label: '狀態', field: 'status', align: 'center' }
+  { name: 'lastQty', label: '前日訂購量', field: 'lastQty', align: 'right' }
 ]
 
 // 自訂清單對話框
@@ -268,36 +256,24 @@ function markDirty(row) {
 
 // 查詢訂貨明細
 async function fetchDetails() {
-  if (!branchCode.value || !salesEmpNo.value) return
-
   loading.value = true
   dirtyRows.value.clear()
   try {
-    details.value = await salesPurchaseApi.getDetails(
-      branchCode.value, salesEmpNo.value, selectedDate.value
-    )
+    orderData.value = await salesPurchaseApi.getDetails(selectedDate.value)
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     loading.value = false
-  }
-}
-
-function loadParams() {
-  return {
-    branchCode: branchCode.value,
-    salesEmpNo: salesEmpNo.value,
-    purchaseDate: selectedDate.value
   }
 }
 
 async function handleLoadYesterday() {
   loadLoading.value = true
   try {
-    await salesPurchaseApi.loadYesterday(loadParams())
+    await salesPurchaseApi.loadYesterday(selectedDate.value)
     await fetchDetails()
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     loadLoading.value = false
   }
@@ -306,10 +282,10 @@ async function handleLoadYesterday() {
 async function handleLoadCustom() {
   loadLoading.value = true
   try {
-    await salesPurchaseApi.loadCustom(loadParams())
+    await salesPurchaseApi.loadCustom(selectedDate.value)
     await fetchDetails()
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     loadLoading.value = false
   }
@@ -318,10 +294,10 @@ async function handleLoadCustom() {
 async function handleLoadBranch() {
   loadLoading.value = true
   try {
-    await salesPurchaseApi.loadBranch(loadParams())
+    await salesPurchaseApi.loadBranch(selectedDate.value)
     await fetchDetails()
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     loadLoading.value = false
   }
@@ -331,18 +307,20 @@ async function handleSave() {
   saveLoading.value = true
   try {
     await salesPurchaseApi.updateOrder({
-      branchCode: branchCode.value,
-      salesEmpNo: salesEmpNo.value,
-      purchaseDate: selectedDate.value,
+      purchaseNo: orderData.value.purchaseNo,
       details: details.value.map(d => ({
+        purchaseNo: orderData.value.purchaseNo,
+        itemNo: d.itemNo,
         productCode: d.productCode,
-        orderQty: d.orderQty
+        unit: d.unit,
+        qty: d.qty,
+        confirmedQty: d.confirmedQty
       }))
     })
     dirtyRows.value.clear()
-    alert('儲存成功')
+    notifySuccess('儲存成功')
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     saveLoading.value = false
   }
@@ -352,18 +330,16 @@ async function handleSave() {
 async function openCustomListDialog() {
   showCustomDialog.value = true
   try {
-    customList.value = await salesPurchaseApi.getCustomList(
-      branchCode.value, salesEmpNo.value
-    )
+    customList.value = await salesPurchaseApi.getCustomList()
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   }
 }
 
 function addCustomItem() {
   if (!newProductCode.value) return
   if (customList.value.some(i => i.productCode === newProductCode.value)) {
-    alert('此產品已在清單中')
+    notifyWarning('此產品已在清單中')
     return
   }
   customList.value.push({
@@ -382,10 +358,10 @@ async function handleSaveCustomList() {
   customSaveLoading.value = true
   try {
     await salesPurchaseApi.saveCustomList(customList.value)
-    alert('自訂清單已儲存')
+    notifySuccess('自訂清單已儲存')
     showCustomDialog.value = false
   } catch (e) {
-    alert(e.message)
+    handleError(e)
   } finally {
     customSaveLoading.value = false
   }

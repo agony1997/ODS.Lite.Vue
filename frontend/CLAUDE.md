@@ -60,7 +60,7 @@ mapper/              # MapStruct DTO 轉換
 
 model/
   ├─ entity/         # JPA 實體類別
-  │   ├─ BaseEntity  # 所有 Entity 的基礎類別，包含 Audit 欄位
+  │   ├─ AuditEntity  # 所有 Entity 的基礎類別，包含 Audit 欄位
   │   ├─ allocation/ # 配貨相關
   │   ├─ auth/       # 權限管理
   │   ├─ branch/     # 營業所資料
@@ -93,7 +93,7 @@ src/
 
 ### 關鍵技術整合
 
-**JPA Auditing**: 所有 Entity 繼承 `BaseEntity`，自動記錄 `createdAt`、`updatedAt`、`createdBy`、`updatedBy`
+**JPA Auditing**: 所有 Entity 繼承 `AuditEntity`，自動記錄 `createdAt`、`updatedAt`、`createdBy`、`updatedBy`
 - 配置於 `JpaAuditingConfig` + `AuditorAwareImpl`
 - `createdBy`/`updatedBy` 從 Spring Security Context 獲取當前使用者
 

@@ -19,17 +19,17 @@
 | locationName | String | 儲位名稱 |
 | branchCode | String | 所屬營業所 |
 | locationType | String | 類型 (WAREHOUSE / CAR) |
-| userId | String | 所屬業務員 (僅 CAR，nullable) |
+| userCode | String | 所屬業務員 (僅 CAR，nullable) |
 | status | String | 狀態 (ACTIVE / INACTIVE) |
 
 ---
 
 ## 儲位類型
 
-| 類型 | 說明 | locationCode | userId |
+| 類型 | 說明 | locationCode | userCode |
 |------|------|--------------|--------|
 | WAREHOUSE | 大庫 | = branchCode | null |
-| CAR | 業務員車存 | 業務員儲位代碼 | 業務員 userId |
+| CAR | 業務員車存 | 業務員儲位代碼 | 業務員 userCode |
 
 ---
 
@@ -42,7 +42,7 @@ User (1) ─────< Location (N)   // 一個業務員可有多儲位（不
 
 ### 範例
 
-| locationCode | branchCode | locationType | userId | 說明 |
+| locationCode | branchCode | locationType | userCode | 說明 |
 |--------------|------------|--------------|--------|------|
 | 1000 | 1000 | WAREHOUSE | null | 營業所 1000 的大庫 |
 | S001 | 1000 | CAR | U001 | 業務員 U001 在營業所 1000 的車存 |
@@ -70,7 +70,7 @@ Location
 | GET | /api/location | 查詢儲位清單 |
 | GET | /api/location/{locationCode} | 查詢單一儲位 |
 | GET | /api/location/branch/{branchCode} | 查詢營業所下的儲位 |
-| GET | /api/location/user/{userId} | 查詢業務員的儲位 |
+| GET | /api/location/user/{userCode} | 查詢業務員的儲位 |
 
 ---
 

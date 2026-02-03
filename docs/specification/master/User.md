@@ -14,7 +14,7 @@
 
 | 欄位 | 型別 | 說明 |
 |------|------|------|
-| userId | String | 員工編號 (PK) |
+| userCode | String | 員工編號 (PK) |
 | userName | String | 姓名 |
 | password | String | 密碼（加密） |
 | branchCode | String | 主要所屬營業所 |
@@ -37,11 +37,11 @@
 | 欄位 | 型別 | 說明 |
 |------|------|------|
 | id | Long | 主鍵 |
-| userId | String | 員工編號 |
+| userCode | String | 員工編號 |
 | branchCode | String | 營業所代碼 |
 | roleCode | String | 角色代碼 |
 
-唯一鍵：(userId, branchCode, roleCode)
+唯一鍵：(userCode, branchCode, roleCode)
 
 ---
 
@@ -68,7 +68,7 @@ AuthUser (1) ─────< Location (N)   // 一個業務員可有多儲位
 
 ### 範例：多營業所角色
 
-| userId | branchCode | roleCode | 說明 |
+| userCode | branchCode | roleCode | 說明 |
 |--------|------------|----------|------|
 | U001 | 1000 | LEADER | U001 在營業所 1000 是組長 |
 | U001 | 1000 | SALES | U001 在營業所 1000 也是業務員 |
@@ -115,10 +115,10 @@ User U001
 | 方法 | 端點 | 說明 |
 |------|------|------|
 | GET | /api/user | 查詢使用者清單 |
-| GET | /api/user/{userId} | 查詢單一使用者 |
+| GET | /api/user/{userCode} | 查詢單一使用者 |
 | GET | /api/user/branch/{branchCode} | 查詢營業所下的使用者 |
 | GET | /api/role | 查詢角色清單 |
-| GET | /api/user/{userId}/roles | 查詢使用者的角色 |
+| GET | /api/user/{userCode}/roles | 查詢使用者的角色 |
 
 ---
 

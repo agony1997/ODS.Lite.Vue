@@ -1,13 +1,13 @@
-package com.example.mockodsvue.service;
+package com.example.mockodsvue.auth.service;
 
-import com.example.mockodsvue.model.dto.auth.AssignRoleRequest;
-import com.example.mockodsvue.model.dto.auth.CreateRoleRequest;
-import com.example.mockodsvue.model.entity.auth.AuthRole;
-import com.example.mockodsvue.model.entity.auth.AuthUser;
-import com.example.mockodsvue.model.entity.auth.AuthUserBranchRole;
-import com.example.mockodsvue.repository.AuthRoleRepository;
-import com.example.mockodsvue.repository.AuthUserRepository;
-import com.example.mockodsvue.repository.AuthUserBranchRoleRepository;
+import com.example.mockodsvue.auth.model.dto.AssignRoleRequest;
+import com.example.mockodsvue.auth.model.dto.CreateRoleRequest;
+import com.example.mockodsvue.auth.model.entity.AuthRole;
+import com.example.mockodsvue.auth.model.entity.AuthUser;
+import com.example.mockodsvue.auth.model.entity.AuthUserBranchRole;
+import com.example.mockodsvue.auth.repository.AuthRoleRepository;
+import com.example.mockodsvue.auth.repository.AuthUserRepository;
+import com.example.mockodsvue.auth.repository.AuthUserBranchRoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ class RoleServiceTest {
 
         testUser = new AuthUser();
         testUser.setId(1);
-        testUser.setUserId("E001");
+        testUser.setUserCode("E001");
         testUser.setUserName("測試使用者");
         testUser.setStatus("ACTIVE");
     }
@@ -148,13 +148,13 @@ class RoleServiceTest {
     void assignRoleToUser_Success() {
         // given
         AssignRoleRequest request = new AssignRoleRequest();
-        request.setUserId("E001");
+        request.setUserCode("E001");
         request.setBranchCode("B001");
         request.setRoleCode("ADMIN");
 
-        when(authUserRepository.findByUserId("E001")).thenReturn(Optional.of(testUser));
+        when(authUserRepository.findByUserCode("E001")).thenReturn(Optional.of(testUser));
         when(authRoleRepository.findByRoleCode("ADMIN")).thenReturn(Optional.of(testRole));
-        when(authUserBranchRoleRepository.findByUserIdAndBranchCode("E001", "B001")).thenReturn(List.of());
+        when(authUserBranchRoleRepository.findByUserCodeAndBranchCode("E001", "B001")).thenReturn(List.of());
 
         // when
         roleService.assignRoleToUser(request);
@@ -162,7 +162,7 @@ class RoleServiceTest {
         // then
         ArgumentCaptor<AuthUserBranchRole> captor = ArgumentCaptor.forClass(AuthUserBranchRole.class);
         verify(authUserBranchRoleRepository).save(captor.capture());
-        assertEquals("E001", captor.getValue().getUserId());
+        assertEquals("E001", captor.getValue().getUserCode());
         assertEquals("B001", captor.getValue().getBranchCode());
         assertEquals("ADMIN", captor.getValue().getRoleCode());
     }
@@ -172,11 +172,11 @@ class RoleServiceTest {
     void assignRoleToUser_UserNotFound_ThrowsException() {
         // given
         AssignRoleRequest request = new AssignRoleRequest();
-        request.setUserId("E999");
+        request.setUserCode("E999");
         request.setBranchCode("B001");
         request.setRoleCode("ADMIN");
 
-        when(authUserRepository.findByUserId("E999")).thenReturn(Optional.empty());
+        when(authUserRepository.findByUserCode("E999")).thenReturn(Optional.empty());
 
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -192,11 +192,11 @@ class RoleServiceTest {
     void assignRoleToUser_RoleNotFound_ThrowsException() {
         // given
         AssignRoleRequest request = new AssignRoleRequest();
-        request.setUserId("E001");
+        request.setUserCode("E001");
         request.setBranchCode("B001");
         request.setRoleCode("UNKNOWN");
 
-        when(authUserRepository.findByUserId("E001")).thenReturn(Optional.of(testUser));
+        when(authUserRepository.findByUserCode("E001")).thenReturn(Optional.of(testUser));
         when(authRoleRepository.findByRoleCode("UNKNOWN")).thenReturn(Optional.empty());
 
         // when & then
@@ -213,18 +213,18 @@ class RoleServiceTest {
     void assignRoleToUser_AlreadyHasRole_ThrowsException() {
         // given
         AssignRoleRequest request = new AssignRoleRequest();
-        request.setUserId("E001");
+        request.setUserCode("E001");
         request.setBranchCode("B001");
         request.setRoleCode("ADMIN");
 
         AuthUserBranchRole existingRole = new AuthUserBranchRole();
-        existingRole.setUserId("E001");
+        existingRole.setUserCode("E001");
         existingRole.setBranchCode("B001");
         existingRole.setRoleCode("ADMIN");
 
-        when(authUserRepository.findByUserId("E001")).thenReturn(Optional.of(testUser));
+        when(authUserRepository.findByUserCode("E001")).thenReturn(Optional.of(testUser));
         when(authRoleRepository.findByRoleCode("ADMIN")).thenReturn(Optional.of(testRole));
-        when(authUserBranchRoleRepository.findByUserIdAndBranchCode("E001", "B001")).thenReturn(List.of(existingRole));
+        when(authUserBranchRoleRepository.findByUserCodeAndBranchCode("E001", "B001")).thenReturn(List.of(existingRole));
 
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -241,11 +241,11 @@ class RoleServiceTest {
         // given
         AuthUserBranchRole userRole = new AuthUserBranchRole();
         userRole.setId(1);
-        userRole.setUserId("E001");
+        userRole.setUserCode("E001");
         userRole.setBranchCode("B001");
         userRole.setRoleCode("ADMIN");
 
-        when(authUserBranchRoleRepository.findByUserIdAndBranchCodeAndRoleCode("E001", "B001", "ADMIN"))
+        when(authUserBranchRoleRepository.findByUserCodeAndBranchCodeAndRoleCode("E001", "B001", "ADMIN"))
                 .thenReturn(Optional.of(userRole));
 
         // when
@@ -259,7 +259,7 @@ class RoleServiceTest {
     @DisplayName("移除使用者角色失敗 - 使用者在此營業所沒有此角色")
     void removeRoleFromUser_NotFound_ThrowsException() {
         // given
-        when(authUserBranchRoleRepository.findByUserIdAndBranchCodeAndRoleCode("E001", "B001", "ADMIN"))
+        when(authUserBranchRoleRepository.findByUserCodeAndBranchCodeAndRoleCode("E001", "B001", "ADMIN"))
                 .thenReturn(Optional.empty());
 
         // when & then

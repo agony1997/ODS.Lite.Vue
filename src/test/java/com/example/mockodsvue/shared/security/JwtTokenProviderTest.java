@@ -1,4 +1,4 @@
-package com.example.mockodsvue.security;
+package com.example.mockodsvue.shared.security;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

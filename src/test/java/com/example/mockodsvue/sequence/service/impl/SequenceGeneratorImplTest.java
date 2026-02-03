@@ -1,9 +1,9 @@
-package com.example.mockodsvue.service.impl;
+package com.example.mockodsvue.sequence.service.impl;
 
-import com.example.mockodsvue.exception.BusinessException;
-import com.example.mockodsvue.model.entity.sequence.DocumentSequence;
-import com.example.mockodsvue.model.enums.SequenceType;
-import com.example.mockodsvue.repository.DocumentSequenceRepository;
+import com.example.mockodsvue.shared.exception.BusinessException;
+import com.example.mockodsvue.sequence.model.entity.DocumentSequence;
+import com.example.mockodsvue.sequence.model.enums.SequenceType;
+import com.example.mockodsvue.sequence.repository.DocumentSequenceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

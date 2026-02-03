@@ -1,9 +1,9 @@
-package com.example.mockodsvue.controller;
+package com.example.mockodsvue.auth.controller;
 
-import com.example.mockodsvue.model.dto.auth.CreateUserRequest;
-import com.example.mockodsvue.model.entity.auth.AuthUser;
-import com.example.mockodsvue.repository.AuthUserRepository;
-import com.example.mockodsvue.security.JwtTokenProvider;
+import com.example.mockodsvue.auth.model.dto.CreateUserRequest;
+import com.example.mockodsvue.auth.model.entity.AuthUser;
+import com.example.mockodsvue.auth.repository.AuthUserRepository;
+import com.example.mockodsvue.shared.security.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,7 +50,7 @@ class UserControllerTest {
     void setUp() {
         // 建立 ADMIN 使用者
         AuthUser admin = new AuthUser();
-        admin.setUserId("ADMIN001");
+        admin.setUserCode("ADMIN001");
         admin.setEmail("admin@example.com");
         admin.setUserName("管理員");
         admin.setPassword(passwordEncoder.encode("password"));
@@ -59,7 +59,7 @@ class UserControllerTest {
 
         // 建立一般使用者
         AuthUser user = new AuthUser();
-        user.setUserId("USER001");
+        user.setUserCode("USER001");
         user.setEmail("user@example.com");
         user.setUserName("一般使用者");
         user.setPassword(passwordEncoder.encode("password"));
@@ -75,7 +75,7 @@ class UserControllerTest {
     @DisplayName("POST /api/users - ADMIN 新增使用者成功")
     void createUser_AsAdmin_Success() throws Exception {
         CreateUserRequest request = new CreateUserRequest();
-        request.setUserId("E001");
+        request.setUserCode("E001");
         request.setEmail("e001@example.com");
         request.setUserName("新使用者");
         request.setPassword("password123");
@@ -85,7 +85,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.userId", is("E001")))
+                .andExpect(jsonPath("$.userCode", is("E001")))
                 .andExpect(jsonPath("$.userName", is("新使用者")));
     }
 
@@ -93,7 +93,7 @@ class UserControllerTest {
     @DisplayName("POST /api/users - 非 ADMIN 無權限")
     void createUser_AsUser_Returns403() throws Exception {
         CreateUserRequest request = new CreateUserRequest();
-        request.setUserId("E001");
+        request.setUserCode("E001");
         request.setEmail("e001@example.com");
         request.setUserName("新使用者");
         request.setPassword("password123");
@@ -109,7 +109,7 @@ class UserControllerTest {
     @DisplayName("POST /api/users - 未登入返回 401")
     void createUser_Unauthenticated_Returns401() throws Exception {
         CreateUserRequest request = new CreateUserRequest();
-        request.setUserId("E001");
+        request.setUserCode("E001");
         request.setEmail("e001@example.com");
         request.setUserName("新使用者");
         request.setPassword("password123");
@@ -130,26 +130,26 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/users/{userId} - ADMIN 查詢單一使用者")
+    @DisplayName("GET /api/users/{userCode} - ADMIN 查詢單一使用者")
     void getUser_AsAdmin_Success() throws Exception {
         mockMvc.perform(get("/api/users/USER001")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId", is("USER001")))
+                .andExpect(jsonPath("$.userCode", is("USER001")))
                 .andExpect(jsonPath("$.userName", is("一般使用者")));
     }
 
     @Test
-    @DisplayName("GET /api/users/{userId} - 使用者查詢自己")
+    @DisplayName("GET /api/users/{userCode} - 使用者查詢自己")
     void getUser_Self_Success() throws Exception {
         mockMvc.perform(get("/api/users/USER001")
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId", is("USER001")));
+                .andExpect(jsonPath("$.userCode", is("USER001")));
     }
 
     @Test
-    @DisplayName("GET /api/users/{userId} - 使用者查詢他人無權限")
+    @DisplayName("GET /api/users/{userCode} - 使用者查詢他人無權限")
     void getUser_OtherUser_Returns403() throws Exception {
         mockMvc.perform(get("/api/users/ADMIN001")
                         .header("Authorization", "Bearer " + userToken))
@@ -157,7 +157,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/users/{userId} - ADMIN 刪除使用者")
+    @DisplayName("DELETE /api/users/{userCode} - ADMIN 刪除使用者")
     void deleteUser_AsAdmin_Success() throws Exception {
         mockMvc.perform(delete("/api/users/USER001")
                         .header("Authorization", "Bearer " + adminToken))
@@ -165,7 +165,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/users/{userId} - 非 ADMIN 無權限")
+    @DisplayName("DELETE /api/users/{userCode} - 非 ADMIN 無權限")
     void deleteUser_AsUser_Returns403() throws Exception {
         mockMvc.perform(delete("/api/users/ADMIN001")
                         .header("Authorization", "Bearer " + userToken))

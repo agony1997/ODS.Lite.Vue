@@ -1,11 +1,11 @@
-package com.example.mockodsvue.service;
+package com.example.mockodsvue.auth.service;
 
-import com.example.mockodsvue.model.dto.auth.CreateUserRequest;
-import com.example.mockodsvue.model.dto.auth.UserResponse;
-import com.example.mockodsvue.model.entity.auth.AuthUser;
-import com.example.mockodsvue.model.entity.auth.AuthUserBranchRole;
-import com.example.mockodsvue.repository.AuthUserRepository;
-import com.example.mockodsvue.repository.AuthUserBranchRoleRepository;
+import com.example.mockodsvue.auth.model.dto.CreateUserRequest;
+import com.example.mockodsvue.auth.model.dto.UserResponse;
+import com.example.mockodsvue.auth.model.entity.AuthUser;
+import com.example.mockodsvue.auth.model.entity.AuthUserBranchRole;
+import com.example.mockodsvue.auth.repository.AuthUserRepository;
+import com.example.mockodsvue.auth.repository.AuthUserBranchRoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,14 +45,14 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         createUserRequest = new CreateUserRequest();
-        createUserRequest.setUserId("E001");
+        createUserRequest.setUserCode("E001");
         createUserRequest.setEmail("test@example.com");
         createUserRequest.setUserName("測試使用者");
         createUserRequest.setPassword("password123");
 
         savedUser = new AuthUser();
         savedUser.setId(1);
-        savedUser.setUserId("E001");
+        savedUser.setUserCode("E001");
         savedUser.setEmail("test@example.com");
         savedUser.setUserName("測試使用者");
         savedUser.setPassword("encodedPassword");
@@ -63,7 +63,7 @@ class UserServiceTest {
     @DisplayName("新增使用者成功")
     void createUser_Success() {
         // given
-        when(authUserRepository.findByUserId("E001")).thenReturn(Optional.empty());
+        when(authUserRepository.findByUserCode("E001")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(authUserRepository.save(any(AuthUser.class))).thenReturn(savedUser);
 
@@ -72,7 +72,7 @@ class UserServiceTest {
 
         // then
         assertNotNull(response);
-        assertEquals("E001", response.getUserId());
+        assertEquals("E001", response.getUserCode());
         assertEquals("測試使用者", response.getUserName());
         assertEquals("test@example.com", response.getEmail());
 
@@ -83,9 +83,9 @@ class UserServiceTest {
 
     @Test
     @DisplayName("新增使用者失敗 - 使用者編號已存在")
-    void createUser_DuplicateUserId_ThrowsException() {
+    void createUser_DuplicateUserCode_ThrowsException() {
         // given
-        when(authUserRepository.findByUserId("E001")).thenReturn(Optional.of(savedUser));
+        when(authUserRepository.findByUserCode("E001")).thenReturn(Optional.of(savedUser));
 
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -103,14 +103,14 @@ class UserServiceTest {
         // given
         AuthUser user2 = new AuthUser();
         user2.setId(2);
-        user2.setUserId("E002");
+        user2.setUserCode("E002");
         user2.setEmail("test2@example.com");
         user2.setUserName("測試使用者2");
         user2.setStatus("ACTIVE");
 
         when(authUserRepository.findAll()).thenReturn(List.of(savedUser, user2));
-        when(authUserBranchRoleRepository.findByUserId("E001")).thenReturn(List.of());
-        when(authUserBranchRoleRepository.findByUserId("E002")).thenReturn(List.of());
+        when(authUserBranchRoleRepository.findByUserCode("E001")).thenReturn(List.of());
+        when(authUserBranchRoleRepository.findByUserCode("E002")).thenReturn(List.of());
 
         // when
         List<UserResponse> users = userService.getAllUsers();
@@ -121,36 +121,36 @@ class UserServiceTest {
 
     @Test
     @DisplayName("根據使用者編號查詢使用者")
-    void getUserByUserId_Success() {
+    void getUserByUserCode_Success() {
         // given
-        when(authUserRepository.findByUserId("E001")).thenReturn(Optional.of(savedUser));
+        when(authUserRepository.findByUserCode("E001")).thenReturn(Optional.of(savedUser));
 
         AuthUserBranchRole role = new AuthUserBranchRole();
-        role.setUserId("E001");
+        role.setUserCode("E001");
         role.setBranchCode("B001");
         role.setRoleCode("ADMIN");
-        when(authUserBranchRoleRepository.findByUserId("E001")).thenReturn(List.of(role));
+        when(authUserBranchRoleRepository.findByUserCode("E001")).thenReturn(List.of(role));
 
         // when
-        UserResponse response = userService.getUserByUserId("E001");
+        UserResponse response = userService.getUserByUserCode("E001");
 
         // then
         assertNotNull(response);
-        assertEquals("E001", response.getUserId());
+        assertEquals("E001", response.getUserCode());
         assertEquals(1, response.getRoles().size());
         assertTrue(response.getRoles().contains("ADMIN"));
     }
 
     @Test
     @DisplayName("查詢使用者失敗 - 使用者不存在")
-    void getUserByUserId_NotFound_ThrowsException() {
+    void getUserByUserCode_NotFound_ThrowsException() {
         // given
-        when(authUserRepository.findByUserId("E999")).thenReturn(Optional.empty());
+        when(authUserRepository.findByUserCode("E999")).thenReturn(Optional.empty());
 
         // when & then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> userService.getUserByUserId("E999")
+                () -> userService.getUserByUserCode("E999")
         );
 
         assertEquals("找不到使用者: E999", exception.getMessage());
@@ -160,13 +160,13 @@ class UserServiceTest {
     @DisplayName("刪除使用者成功")
     void deleteUser_Success() {
         // given
-        when(authUserRepository.findByUserId("E001")).thenReturn(Optional.of(savedUser));
+        when(authUserRepository.findByUserCode("E001")).thenReturn(Optional.of(savedUser));
 
         // when
         userService.deleteUser("E001");
 
         // then
-        verify(authUserBranchRoleRepository).deleteByUserId("E001");
+        verify(authUserBranchRoleRepository).deleteByUserCode("E001");
         verify(authUserRepository).delete(savedUser);
     }
 
@@ -174,7 +174,7 @@ class UserServiceTest {
     @DisplayName("刪除使用者失敗 - 使用者不存在")
     void deleteUser_NotFound_ThrowsException() {
         // given
-        when(authUserRepository.findByUserId("E999")).thenReturn(Optional.empty());
+        when(authUserRepository.findByUserCode("E999")).thenReturn(Optional.empty());
 
         // when & then
         IllegalArgumentException exception = assertThrows(

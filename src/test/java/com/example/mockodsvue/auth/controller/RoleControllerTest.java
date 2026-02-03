@@ -1,12 +1,12 @@
-package com.example.mockodsvue.controller;
+package com.example.mockodsvue.auth.controller;
 
-import com.example.mockodsvue.model.dto.auth.AssignRoleRequest;
-import com.example.mockodsvue.model.dto.auth.CreateRoleRequest;
-import com.example.mockodsvue.model.entity.auth.AuthRole;
-import com.example.mockodsvue.model.entity.auth.AuthUser;
-import com.example.mockodsvue.repository.AuthRoleRepository;
-import com.example.mockodsvue.repository.AuthUserRepository;
-import com.example.mockodsvue.security.JwtTokenProvider;
+import com.example.mockodsvue.auth.model.dto.AssignRoleRequest;
+import com.example.mockodsvue.auth.model.dto.CreateRoleRequest;
+import com.example.mockodsvue.auth.model.entity.AuthRole;
+import com.example.mockodsvue.auth.model.entity.AuthUser;
+import com.example.mockodsvue.auth.repository.AuthRoleRepository;
+import com.example.mockodsvue.auth.repository.AuthUserRepository;
+import com.example.mockodsvue.shared.security.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,7 +56,7 @@ class RoleControllerTest {
     void setUp() {
         // 建立使用者
         AuthUser admin = new AuthUser();
-        admin.setUserId("ADMIN001");
+        admin.setUserCode("ADMIN001");
         admin.setEmail("admin@example.com");
         admin.setUserName("管理員");
         admin.setPassword(passwordEncoder.encode("password"));
@@ -64,7 +64,7 @@ class RoleControllerTest {
         authUserRepository.save(admin);
 
         AuthUser user = new AuthUser();
-        user.setUserId("USER001");
+        user.setUserCode("USER001");
         user.setEmail("user@example.com");
         user.setUserName("一般使用者");
         user.setPassword(passwordEncoder.encode("password"));
@@ -133,7 +133,7 @@ class RoleControllerTest {
     @DisplayName("POST /api/roles/assign - ADMIN 指派角色給使用者")
     void assignRole_AsAdmin_Success() throws Exception {
         AssignRoleRequest request = new AssignRoleRequest();
-        request.setUserId("USER001");
+        request.setUserCode("USER001");
         request.setBranchCode("B001");
         request.setRoleCode("SALES");
 
@@ -148,7 +148,7 @@ class RoleControllerTest {
     @DisplayName("POST /api/roles/assign - 指派不存在的角色")
     void assignRole_RoleNotFound_Returns400() throws Exception {
         AssignRoleRequest request = new AssignRoleRequest();
-        request.setUserId("USER001");
+        request.setUserCode("USER001");
         request.setBranchCode("B001");
         request.setRoleCode("UNKNOWN");
 
@@ -160,7 +160,7 @@ class RoleControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/roles/assign/{userId}/{branchCode}/{roleCode} - 非 ADMIN 無權限")
+    @DisplayName("DELETE /api/roles/assign/{userCode}/{branchCode}/{roleCode} - 非 ADMIN 無權限")
     void removeRole_AsUser_Returns403() throws Exception {
         mockMvc.perform(delete("/api/roles/assign/USER001/B001/SALES")
                         .header("Authorization", "Bearer " + userToken))

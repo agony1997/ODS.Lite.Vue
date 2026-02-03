@@ -1,19 +1,25 @@
-package com.example.mockodsvue.service;
+package com.example.mockodsvue.purchase.service;
 
-import com.example.mockodsvue.exception.BusinessException;
-import com.example.mockodsvue.mapper.SalesPurchaseMapper;
-import com.example.mockodsvue.model.dto.SalesPurchaseDTO;
-import com.example.mockodsvue.model.dto.SalesPurchaseDTO.SalesPurchaseDetailDTO;
-import com.example.mockodsvue.model.dto.SalesPurchaseListDTO;
-import com.example.mockodsvue.model.entity.branch.BranchProductList;
-import com.example.mockodsvue.model.entity.branch.Location;
-import com.example.mockodsvue.model.entity.purchase.SalesPurchaseList;
-import com.example.mockodsvue.model.entity.purchase.SalesPurchaseOrder;
-import com.example.mockodsvue.model.entity.purchase.SalesPurchaseOrderDetail;
-import com.example.mockodsvue.model.enums.LocationType;
-import com.example.mockodsvue.model.enums.SalesOrderDetailStatus;
-import com.example.mockodsvue.model.enums.SequenceType;
-import com.example.mockodsvue.repository.*;
+import com.example.mockodsvue.shared.exception.BusinessException;
+import com.example.mockodsvue.purchase.mapper.SalesPurchaseMapper;
+import com.example.mockodsvue.purchase.model.dto.SalesPurchaseDTO;
+import com.example.mockodsvue.purchase.model.dto.SalesPurchaseDTO.SalesPurchaseDetailDTO;
+import com.example.mockodsvue.purchase.model.dto.SalesPurchaseListDTO;
+import com.example.mockodsvue.branch.model.entity.BranchProductList;
+import com.example.mockodsvue.branch.model.entity.Location;
+import com.example.mockodsvue.purchase.model.entity.SalesPurchaseList;
+import com.example.mockodsvue.purchase.model.entity.SalesPurchaseOrder;
+import com.example.mockodsvue.purchase.model.entity.SalesPurchaseOrderDetail;
+import com.example.mockodsvue.branch.model.enums.LocationType;
+import com.example.mockodsvue.purchase.model.enums.SalesOrderDetailStatus;
+import com.example.mockodsvue.sequence.model.enums.SequenceType;
+import com.example.mockodsvue.branch.repository.BranchProductListRepository;
+import com.example.mockodsvue.branch.repository.LocationRepository;
+import com.example.mockodsvue.purchase.repository.BranchPurchaseFrozenRepository;
+import com.example.mockodsvue.purchase.repository.SalesPurchaseListRepository;
+import com.example.mockodsvue.purchase.repository.SalesPurchaseOrderDetailRepository;
+import com.example.mockodsvue.purchase.repository.SalesPurchaseOrderRepository;
+import com.example.mockodsvue.sequence.service.SequenceGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -102,7 +108,7 @@ class SalesPurchaseOrderServiceTest {
         @DisplayName("查詢已存在的訂單 - 成功")
         void findExistingOrder_Success() {
             // given
-            when(locationRepository.findByLocationCode(LOCATION_CODE))
+            when(locationRepository.findByUserCode(CURRENT_USER))
                     .thenReturn(Optional.of(testLocation));
             when(orderRepository.findByLocationCodeAndPurchaseDate(LOCATION_CODE, validPurchaseDate))
                     .thenReturn(Optional.of(testOrder));
@@ -118,7 +124,7 @@ class SalesPurchaseOrderServiceTest {
                     .thenReturn(expectedDto);
 
             // when
-            SalesPurchaseDTO result = service.findOrCreateByCondition(LOCATION_CODE, validPurchaseDate, CURRENT_USER);
+            SalesPurchaseDTO result = service.findOrCreateByCondition(CURRENT_USER, validPurchaseDate);
 
             // then
             assertNotNull(result);
@@ -131,7 +137,7 @@ class SalesPurchaseOrderServiceTest {
         void createNewOrder_Success() {
             // given
             String newPurchaseNo = "SPO-20260125-001";
-            when(locationRepository.findByLocationCode(LOCATION_CODE))
+            when(locationRepository.findByUserCode(CURRENT_USER))
                     .thenReturn(Optional.of(testLocation));
             when(orderRepository.findByLocationCodeAndPurchaseDate(LOCATION_CODE, validPurchaseDate))
                     .thenReturn(Optional.empty());
@@ -157,7 +163,7 @@ class SalesPurchaseOrderServiceTest {
                     .thenReturn(expectedDto);
 
             // when
-            SalesPurchaseDTO result = service.findOrCreateByCondition(LOCATION_CODE, validPurchaseDate, CURRENT_USER);
+            SalesPurchaseDTO result = service.findOrCreateByCondition(CURRENT_USER, validPurchaseDate);
 
             // then
             assertNotNull(result);
@@ -174,7 +180,7 @@ class SalesPurchaseOrderServiceTest {
             // when & then
             BusinessException exception = assertThrows(
                     BusinessException.class,
-                    () -> service.findOrCreateByCondition(LOCATION_CODE, tooEarlyDate, CURRENT_USER)
+                    () -> service.findOrCreateByCondition(CURRENT_USER, tooEarlyDate)
             );
 
             assertTrue(exception.getMessage().contains("訂貨日期必須在"));
@@ -190,26 +196,26 @@ class SalesPurchaseOrderServiceTest {
             // when & then
             BusinessException exception = assertThrows(
                     BusinessException.class,
-                    () -> service.findOrCreateByCondition(LOCATION_CODE, tooLateDate, CURRENT_USER)
+                    () -> service.findOrCreateByCondition(CURRENT_USER, tooLateDate)
             );
 
             assertTrue(exception.getMessage().contains("訂貨日期必須在"));
         }
 
         @Test
-        @DisplayName("儲位不存在 - 拋出例外")
-        void locationNotFound_ThrowsException() {
+        @DisplayName("使用者無對應儲位 - 拋出例外")
+        void userLocationNotFound_ThrowsException() {
             // given
-            when(locationRepository.findByLocationCode(LOCATION_CODE))
+            when(locationRepository.findByUserCode(CURRENT_USER))
                     .thenReturn(Optional.empty());
 
             // when & then
             BusinessException exception = assertThrows(
                     BusinessException.class,
-                    () -> service.findOrCreateByCondition(LOCATION_CODE, validPurchaseDate, CURRENT_USER)
+                    () -> service.findOrCreateByCondition(CURRENT_USER, validPurchaseDate)
             );
 
-            assertEquals("儲位不存在: " + LOCATION_CODE, exception.getMessage());
+            assertTrue(exception.getMessage().contains("找不到使用者對應的儲位"));
         }
     }
 
@@ -280,29 +286,25 @@ class SalesPurchaseOrderServiceTest {
             SalesPurchaseOrder yesterdayOrder = new SalesPurchaseOrder();
             yesterdayOrder.setPurchaseNo("SPO-YESTERDAY-001");
 
+            when(locationRepository.findByUserCode(CURRENT_USER))
+                    .thenReturn(Optional.of(testLocation));
             when(orderRepository.findByLocationCodeAndPurchaseDate(LOCATION_CODE, yesterday))
                     .thenReturn(Optional.of(yesterdayOrder));
             when(detailRepository.findByPurchaseNoOrderByItemNo(yesterdayOrder.getPurchaseNo()))
                     .thenReturn(List.of(createTestDetail("P001", 5)));
-            when(locationRepository.findByLocationCode(LOCATION_CODE))
-                    .thenReturn(Optional.of(testLocation));
             when(orderRepository.findByLocationCodeAndPurchaseDate(LOCATION_CODE, validPurchaseDate))
                     .thenReturn(Optional.of(testOrder));
             when(mapper.toDetailEntity(isNull(), eq(0), anyString(), anyString(), anyInt(), eq(0)))
                     .thenReturn(createTestDetail("P001", 5));
             when(branchProductRepository.findByBranchCodeOrderBySortOrder(BRANCH_CODE))
                     .thenReturn(List.of());
-            when(orderRepository.findByLocationCodeAndPurchaseDate(LOCATION_CODE, validPurchaseDate.minusDays(1)))
-                    .thenReturn(Optional.of(yesterdayOrder));
-            when(detailRepository.findByPurchaseNoOrderByItemNo(yesterdayOrder.getPurchaseNo()))
-                    .thenReturn(List.of(createTestDetail("P001", 5)));
 
             SalesPurchaseDTO expectedDto = createTestDTO();
             when(mapper.toDTO(eq(testOrder), anyList(), anyMap(), anyMap()))
                     .thenReturn(expectedDto);
 
             // when
-            SalesPurchaseDTO result = service.loadFromYesterdayOrder(LOCATION_CODE, validPurchaseDate, CURRENT_USER);
+            SalesPurchaseDTO result = service.loadFromYesterdayOrder(CURRENT_USER, validPurchaseDate);
 
             // then
             assertNotNull(result);
@@ -313,14 +315,15 @@ class SalesPurchaseOrderServiceTest {
         @DisplayName("找不到前一天訂單 - 拋出例外")
         void yesterdayOrderNotFound_ThrowsException() {
             // given
-            LocalDate yesterday = validPurchaseDate.minusDays(1);
-            when(orderRepository.findByLocationCodeAndPurchaseDate(LOCATION_CODE, yesterday))
+            when(locationRepository.findByUserCode(CURRENT_USER))
+                    .thenReturn(Optional.of(testLocation));
+            when(orderRepository.findByLocationCodeAndPurchaseDate(LOCATION_CODE, validPurchaseDate.minusDays(1)))
                     .thenReturn(Optional.empty());
 
             // when & then
             BusinessException exception = assertThrows(
                     BusinessException.class,
-                    () -> service.loadFromYesterdayOrder(LOCATION_CODE, validPurchaseDate, CURRENT_USER)
+                    () -> service.loadFromYesterdayOrder(CURRENT_USER, validPurchaseDate)
             );
 
             assertEquals("找不到前一天的訂單", exception.getMessage());
@@ -342,10 +345,10 @@ class SalesPurchaseOrderServiceTest {
             customItem.setUnit("箱");
             customItem.setQty(10);
 
+            when(locationRepository.findByUserCode(CURRENT_USER))
+                    .thenReturn(Optional.of(testLocation));
             when(customListRepository.findByLocationCodeOrderBySortOrder(LOCATION_CODE))
                     .thenReturn(List.of(customItem));
-            when(locationRepository.findByLocationCode(LOCATION_CODE))
-                    .thenReturn(Optional.of(testLocation));
             when(orderRepository.findByLocationCodeAndPurchaseDate(LOCATION_CODE, validPurchaseDate))
                     .thenReturn(Optional.of(testOrder));
             when(mapper.toDetailEntity(isNull(), eq(0), anyString(), anyString(), anyInt(), eq(0)))
@@ -360,7 +363,7 @@ class SalesPurchaseOrderServiceTest {
                     .thenReturn(expectedDto);
 
             // when
-            SalesPurchaseDTO result = service.loadFromCustomList(LOCATION_CODE, validPurchaseDate, CURRENT_USER);
+            SalesPurchaseDTO result = service.loadFromCustomList(CURRENT_USER, validPurchaseDate);
 
             // then
             assertNotNull(result);
@@ -370,13 +373,15 @@ class SalesPurchaseOrderServiceTest {
         @DisplayName("自定義清單為空 - 拋出例外")
         void customListEmpty_ThrowsException() {
             // given
+            when(locationRepository.findByUserCode(CURRENT_USER))
+                    .thenReturn(Optional.of(testLocation));
             when(customListRepository.findByLocationCodeOrderBySortOrder(LOCATION_CODE))
                     .thenReturn(List.of());
 
             // when & then
             BusinessException exception = assertThrows(
                     BusinessException.class,
-                    () -> service.loadFromCustomList(LOCATION_CODE, validPurchaseDate, CURRENT_USER)
+                    () -> service.loadFromCustomList(CURRENT_USER, validPurchaseDate)
             );
 
             assertEquals("尚未建立自定義產品清單", exception.getMessage());
@@ -401,12 +406,14 @@ class SalesPurchaseOrderServiceTest {
             SalesPurchaseList entity = new SalesPurchaseList();
             entity.setProductCode("P001");
 
+            when(locationRepository.findByUserCode(CURRENT_USER))
+                    .thenReturn(Optional.of(testLocation));
             when(mapper.toListEntity(any(SalesPurchaseListDTO.class))).thenReturn(entity);
             when(customListRepository.saveAll(anyList())).thenReturn(List.of(entity));
             when(mapper.toListDTOList(anyList())).thenReturn(List.of(item));
 
             // when
-            List<SalesPurchaseListDTO> result = service.saveCustomList(LOCATION_CODE, List.of(item));
+            List<SalesPurchaseListDTO> result = service.saveCustomList(CURRENT_USER, List.of(item));
 
             // then
             assertNotNull(result);
@@ -425,12 +432,14 @@ class SalesPurchaseOrderServiceTest {
             SalesPurchaseListDTO dto = new SalesPurchaseListDTO();
             dto.setProductCode("P001");
 
+            when(locationRepository.findByUserCode(CURRENT_USER))
+                    .thenReturn(Optional.of(testLocation));
             when(customListRepository.findByLocationCodeOrderBySortOrder(LOCATION_CODE))
                     .thenReturn(List.of(entity));
             when(mapper.toListDTOList(anyList())).thenReturn(List.of(dto));
 
             // when
-            List<SalesPurchaseListDTO> result = service.getCustomList(LOCATION_CODE);
+            List<SalesPurchaseListDTO> result = service.getCustomList(CURRENT_USER);
 
             // then
             assertNotNull(result);

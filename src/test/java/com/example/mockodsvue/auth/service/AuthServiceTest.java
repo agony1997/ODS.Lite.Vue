@@ -1,12 +1,12 @@
-package com.example.mockodsvue.service;
+package com.example.mockodsvue.auth.service;
 
-import com.example.mockodsvue.model.dto.auth.LoginRequest;
-import com.example.mockodsvue.model.dto.auth.LoginResponse;
-import com.example.mockodsvue.model.entity.auth.AuthUser;
-import com.example.mockodsvue.model.entity.auth.AuthUserBranchRole;
-import com.example.mockodsvue.repository.AuthUserRepository;
-import com.example.mockodsvue.repository.AuthUserBranchRoleRepository;
-import com.example.mockodsvue.security.JwtTokenProvider;
+import com.example.mockodsvue.auth.model.dto.LoginRequest;
+import com.example.mockodsvue.auth.model.dto.LoginResponse;
+import com.example.mockodsvue.auth.model.entity.AuthUser;
+import com.example.mockodsvue.auth.model.entity.AuthUserBranchRole;
+import com.example.mockodsvue.auth.repository.AuthUserRepository;
+import com.example.mockodsvue.auth.repository.AuthUserBranchRoleRepository;
+import com.example.mockodsvue.shared.security.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,14 +52,14 @@ class AuthServiceTest {
     void setUp() {
         testUser = new AuthUser();
         testUser.setId(1);
-        testUser.setUserId("E001");
+        testUser.setUserCode("E001");
         testUser.setUserName("測試使用者");
         testUser.setEmail("test@example.com");
         testUser.setPassword("encodedPassword");
         testUser.setStatus("ACTIVE");
 
         loginRequest = new LoginRequest();
-        loginRequest.setUserId("E001");
+        loginRequest.setUserCode("E001");
         loginRequest.setPassword("password123");
     }
 
@@ -70,13 +70,13 @@ class AuthServiceTest {
         Authentication authentication = mock(Authentication.class);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
-        when(authUserRepository.findByUserId("E001")).thenReturn(Optional.of(testUser));
+        when(authUserRepository.findByUserCode("E001")).thenReturn(Optional.of(testUser));
 
         AuthUserBranchRole role = new AuthUserBranchRole();
-        role.setUserId("E001");
+        role.setUserCode("E001");
         role.setBranchCode("B001");
         role.setRoleCode("ADMIN");
-        when(authUserBranchRoleRepository.findByUserId("E001")).thenReturn(List.of(role));
+        when(authUserBranchRoleRepository.findByUserCode("E001")).thenReturn(List.of(role));
         when(jwtTokenProvider.generateToken(eq("E001"), anyList())).thenReturn("test-jwt-token");
 
         // when
@@ -85,7 +85,7 @@ class AuthServiceTest {
         // then
         assertNotNull(response);
         assertEquals("test-jwt-token", response.getToken());
-        assertEquals("E001", response.getUserId());
+        assertEquals("E001", response.getUserCode());
         assertEquals("測試使用者", response.getUserName());
         assertEquals(1, response.getRoles().size());
         assertTrue(response.getRoles().contains("ADMIN"));
@@ -117,8 +117,8 @@ class AuthServiceTest {
         // given
         Authentication authentication = mock(Authentication.class);
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
-        when(authUserRepository.findByUserId("E001")).thenReturn(Optional.of(testUser));
-        when(authUserBranchRoleRepository.findByUserId("E001")).thenReturn(List.of());
+        when(authUserRepository.findByUserCode("E001")).thenReturn(Optional.of(testUser));
+        when(authUserBranchRoleRepository.findByUserCode("E001")).thenReturn(List.of());
         when(jwtTokenProvider.generateToken(eq("E001"), anyList())).thenReturn("test-jwt-token");
 
         // when

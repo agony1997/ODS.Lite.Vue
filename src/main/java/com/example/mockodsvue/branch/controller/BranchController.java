@@ -1,0 +1,31 @@
+package com.example.mockodsvue.branch.controller;
+
+import com.example.mockodsvue.branch.model.entity.Branch;
+import com.example.mockodsvue.branch.repository.BranchRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/branches")
+@PreAuthorize("isAuthenticated()")
+public class BranchController {
+
+    private final BranchRepository branchRepository;
+
+    /**
+     * 取得所有啟用的營業所清單
+     * GET /api/branches
+     */
+    @GetMapping
+    public ResponseEntity<List<Branch>> getAllEnabled() {
+        List<Branch> result = branchRepository.findByStatus("ACTIVE");
+        return ResponseEntity.ok(result);
+    }
+}

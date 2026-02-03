@@ -9,16 +9,16 @@ INSERT INTO auth_role (role_code, role_name, created_at, updated_at, created_by,
 INSERT INTO auth_role (role_code, role_name, created_at, updated_at, created_by, updated_by) VALUES ('SALES', '業務員', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
 
 -- auth_user (使用者) - 密碼為 BCrypt 加密後的 "password123"
-INSERT INTO auth_user (user_id, email, user_name, password, branch_code, phone, status, created_at, updated_at, created_by, updated_by) VALUES ('A001', 'admin@example.com', '管理員', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrE5sNpLkV8VTFhvN5M5CfBZ5W7KXi', 'BR01', '0912345678', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
-INSERT INTO auth_user (user_id, email, user_name, password, branch_code, phone, status, created_at, updated_at, created_by, updated_by) VALUES ('U001', 'user1@example.com', '王小明', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrE5sNpLkV8VTFhvN5M5CfBZ5W7KXi', 'BR01', '0923456789', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
-INSERT INTO auth_user (user_id, email, user_name, password, branch_code, phone, status, created_at, updated_at, created_by, updated_by) VALUES ('U002', 'user2@example.com', '李小華', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrE5sNpLkV8VTFhvN5M5CfBZ5W7KXi', 'BR02', '0934567890', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
-INSERT INTO auth_user (user_id, email, user_name, password, branch_code, phone, status, created_at, updated_at, created_by, updated_by) VALUES ('U003', 'user3@example.com', '二狗子', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrE5sNpLkV8VTFhvN5M5CfBZ5W7KXi', 'BR02', '0934567891', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO auth_user (user_code, email, user_name, password, branch_code, phone, status, created_at, updated_at, created_by, updated_by) VALUES ('A001', 'admin@example.com', '管理員', '$2a$10$aRi0uOtcUAdiokog5Fpq3OT0VmN.eNMhqFmeIMb.buX7uZMA7Whxa', 'BR01', '0912345678', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO auth_user (user_code, email, user_name, password, branch_code, phone, status, created_at, updated_at, created_by, updated_by) VALUES ('U001', 'user1@example.com', '王小明', '$2a$10$aRi0uOtcUAdiokog5Fpq3OT0VmN.eNMhqFmeIMb.buX7uZMA7Whxa', 'BR01', '0923456789', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO auth_user (user_code, email, user_name, password, branch_code, phone, status, created_at, updated_at, created_by, updated_by) VALUES ('U002', 'user2@example.com', '李小華', '$2a$10$aRi0uOtcUAdiokog5Fpq3OT0VmN.eNMhqFmeIMb.buX7uZMA7Whxa', 'BR02', '0934567890', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO auth_user (user_code, email, user_name, password, branch_code, phone, status, created_at, updated_at, created_by, updated_by) VALUES ('U003', 'user3@example.com', '二狗子', '$2a$10$aRi0uOtcUAdiokog5Fpq3OT0VmN.eNMhqFmeIMb.buX7uZMA7Whxa', 'BR02', '0934567891', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
 
 -- auth_user_branch_role (使用者營業所角色關聯)
-INSERT INTO auth_user_branch_role (user_id, branch_code, role_code, created_at, updated_at, created_by, updated_by) VALUES ('A001', 'BR01', 'ADMIN', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
-INSERT INTO auth_user_branch_role (user_id, branch_code, role_code, created_at, updated_at, created_by, updated_by) VALUES ('U001', 'BR01', 'SALES', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
-INSERT INTO auth_user_branch_role (user_id, branch_code, role_code, created_at, updated_at, created_by, updated_by) VALUES ('U002', 'BR02', 'LEADER', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
-INSERT INTO auth_user_branch_role (user_id, branch_code, role_code, created_at, updated_at, created_by, updated_by) VALUES ('U003', 'BR02', 'STOREKEEPER', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO auth_user_branch_role (user_code, branch_code, role_code, created_at, updated_at, created_by, updated_by) VALUES ('A001', 'BR01', 'ADMIN', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO auth_user_branch_role (user_code, branch_code, role_code, created_at, updated_at, created_by, updated_by) VALUES ('U001', 'BR01', 'SALES', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO auth_user_branch_role (user_code, branch_code, role_code, created_at, updated_at, created_by, updated_by) VALUES ('U002', 'BR02', 'LEADER', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO auth_user_branch_role (user_code, branch_code, role_code, created_at, updated_at, created_by, updated_by) VALUES ('U003', 'BR02', 'STOREKEEPER', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
 
 -- =============================================
 -- Master 主檔資料
@@ -84,10 +84,10 @@ INSERT INTO branch (branch_code, branch_name, address, phone, status, created_at
 INSERT INTO branch (branch_code, branch_name, address, phone, status, created_at, updated_at, created_by, updated_by) VALUES ('BR03', '霧峰營業所', '台中市霧峰區樹仁路25號', '04-14567890', 'INACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
 
 -- location (儲位)
-INSERT INTO location (location_code, location_name, branch_code, user_id, location_type, status, created_at, updated_at, created_by, updated_by) VALUES ('1000', '信義總部倉庫', 'BR01', NULL, 'WAREHOUSE', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
-INSERT INTO location (location_code, location_name, branch_code, user_id, location_type, status, created_at, updated_at, created_by, updated_by) VALUES ('1200', '王小明', 'BR01', 'U001', 'CAR', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
-INSERT INTO location (location_code, location_name, branch_code, user_id, location_type, status, created_at, updated_at, created_by, updated_by) VALUES ('2000', '北屯營業所倉庫', 'BR02', NULL, 'WAREHOUSE', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
-INSERT INTO location (location_code, location_name, branch_code, user_id, location_type, status, created_at, updated_at, created_by, updated_by) VALUES ('2100', '李小華', 'BR02', 'U002', 'CAR', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO location (location_code, location_name, branch_code, user_code, location_type, status, created_at, updated_at, created_by, updated_by) VALUES ('1000', '信義總部倉庫', 'BR01', NULL, 'WAREHOUSE', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO location (location_code, location_name, branch_code, user_code, location_type, status, created_at, updated_at, created_by, updated_by) VALUES ('1200', '王小明', 'BR01', 'U001', 'CAR', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO location (location_code, location_name, branch_code, user_code, location_type, status, created_at, updated_at, created_by, updated_by) VALUES ('2000', '北屯營業所倉庫', 'BR02', NULL, 'WAREHOUSE', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
+INSERT INTO location (location_code, location_name, branch_code, user_code, location_type, status, created_at, updated_at, created_by, updated_by) VALUES ('2100', '李小華', 'BR02', 'U002', 'CAR', 'ACTIVE', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');
 
 -- branch_product_list (營業所商品清單)
 INSERT INTO branch_product_list (branch_code, product_code, product_name, unit, sort_order, created_at, updated_at, created_by, updated_by) VALUES ('BR01', 'P001', '林鳳營鮮乳(936ml)', '瓶', 1, '2023-01-01 00:00:00', '2023-01-01 00:00:00', 'SYSTEM', 'SYSTEM');

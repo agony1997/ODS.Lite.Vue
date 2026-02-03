@@ -43,29 +43,54 @@ docker-compose up -d   # 啟動 PostgreSQL + pgAdmin
 
 ## 架構
 
-### 後端分層
+### 後端分層（Pragmatic DDD - Package-by-Domain）
 
 ```
 src/main/java/com/example/mockodsvue/
-├── controller/       # REST API（/api/ 前綴）
-├── service/          # 業務邏輯
-├── repository/       # Spring Data JPA
-├── mapper/           # MapStruct DTO 轉換
-├── model/
-│   ├── entity/       # JPA 實體（繼承 BaseEntity，含 Audit 欄位）
-│   │   ├── allocation/  # 配貨
-│   │   ├── auth/        # 權限
-│   │   ├── branch/      # 營業所
-│   │   ├── closing/     # 結帳
-│   │   ├── delivery/    # 配送
-│   │   ├── inventory/   # 庫存
-│   │   ├── master/      # 主檔
-│   │   ├── purchase/    # 訂貨
-│   │   ├── receive/     # 收貨
-│   │   └── sequence/    # 序號
-│   └── dto/          # 資料傳輸物件
-└── config/           # 設定（Security, JPA Auditing 等）
+├── MockOdsVueApplication.java     # 進入點
+│
+├── shared/                        # 跨領域基礎設施
+│   ├── config/                    # SecurityConfig, JpaAuditingConfig, GlobalExceptionHandler
+│   ├── security/                  # JWT (JwtTokenProvider, JwtAuthenticationFilter, UserDetailsServiceImpl)
+│   ├── exception/                 # BusinessException
+│   └── model/                     # AuditEntity, Sortable, BatchSortable
+│
+├── auth/                          # 認證授權領域
+│   ├── controller/                # AuthController, UserController, RoleController
+│   ├── service/                   # AuthService, UserService, RoleService
+│   ├── repository/                # AuthUserRepository, AuthRoleRepository, AuthUserBranchRoleRepository
+│   └── model/entity/ + dto/       # AuthUser, AuthRole, LoginRequest, LoginResponse...
+│
+├── branch/                        # 營業所領域
+│   ├── controller/                # BranchController, BranchProductListController
+│   ├── service/                   # BranchProductListService
+│   ├── repository/                # BranchRepository, LocationRepository...
+│   └── model/entity/ + dto/ + enums/
+│
+├── purchase/                      # 訂貨領域（核心業務）
+│   ├── controller/                # SalesPurchaseController, BranchPurchaseController
+│   ├── service/                   # SalesPurchaseOrderService, BranchPurchaseService
+│   ├── mapper/                    # SalesPurchaseMapper, BranchPurchaseMapper
+│   ├── repository/                # SPO/SPOD/BPO/BPOD/BPF 等 repository
+│   └── model/entity/ + dto/ + enums/
+│
+├── master/                        # 主檔資料領域（僅 repository + entity）
+│   ├── repository/                # ProductRepository, FactoryRepository...
+│   └── model/entity/ + enums/     # Product, Factory, Customer...
+│
+├── sequence/                      # 序號產生器領域
+│   ├── service/                   # SequenceGenerator interface + impl
+│   ├── repository/                # DocumentSequenceRepository
+│   └── model/entity/ + enums/     # DocumentSequence, SequenceType
+│
+├── allocation/                    # 配貨領域（休眠）
+├── delivery/                      # 配送領域（休眠）
+├── closing/                       # 結帳退貨領域（休眠）
+├── inventory/                     # 庫存領域（休眠）
+└── receive/                       # 收貨領域（休眠）
 ```
+
+**跨領域依賴**：purchase → branch, master, sequence；shared.security → auth
 
 ### 前端結構
 
@@ -87,7 +112,7 @@ frontend/src/
 
 ## 技術重點
 
-- **JPA Auditing**: BaseEntity 自動記錄 createdAt/updatedAt/createdBy/updatedBy
+- **JPA Auditing**: AuditEntity 自動記錄 createdAt/updatedAt/createdBy/updatedBy
 - **MapStruct**: 編譯時生成 Entity ↔ DTO 轉換，需搭配 lombok-mapstruct-binding
 - **Spring Security + JWT**: 密鑰設定於 application.properties
 - **資料初始化**: ddl-auto=create + data.sql 每次啟動重建
@@ -96,6 +121,6 @@ frontend/src/
 
 - 所有 API 端點以 `/api/` 為前綴
 - 前端 API 模組使用原生 `fetch`
-- Entity 必須繼承 BaseEntity
+- Entity 必須繼承 AuditEntity
 - DTO 與 Entity 透過 MapStruct Mapper 轉換
 - 回應語言使用繁體中文
